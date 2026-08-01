@@ -1,0 +1,79 @@
+.door-experience {
+  position: fixed;
+  z-index: 500;
+  inset: 0;
+  overflow: hidden;
+  isolation: isolate;
+  background: #0b0b0d;
+  animation: room-enter .55s cubic-bezier(.2, .8, .2, 1) both;
+}
+
+.door-experience-canvas {
+  position: absolute !important;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  cursor: crosshair;
+}
+
+.door-experience::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 35%, rgba(0, 0, 0, .42) 125%);
+}
+
+.door-experience-hud,
+.door-experience-exit,
+.door-experience-fallback {
+  position: absolute;
+  z-index: 2;
+  font-family: 'DM Mono', monospace;
+  letter-spacing: .14em;
+}
+
+.door-experience-hud {
+  left: clamp(1rem, 3vw, 2.4rem);
+  bottom: clamp(1rem, 3vw, 2.4rem);
+  color: rgba(247, 244, 238, .82);
+  pointer-events: none;
+}
+
+.door-experience-hud span { display: block; font-size: .67rem; }
+.door-experience-hud p { margin: .5rem 0 0; color: rgba(220, 216, 208, .56); font-size: .56rem; }
+
+.door-experience-exit {
+  top: clamp(1rem, 3vw, 2.4rem);
+  right: clamp(1rem, 3vw, 2.4rem);
+  padding: .7rem .8rem;
+  border: 1px solid rgba(244, 240, 231, .45);
+  color: #f4f0e8;
+  background: rgba(10, 10, 12, .36);
+  font-size: .59rem;
+  cursor: pointer;
+  transition: background .2s ease, color .2s ease;
+}
+
+.door-experience-exit:hover,
+.door-experience-exit:focus-visible { background: #f4f0e8; color: #111115; outline: none; }
+
+.door-experience-fallback {
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+  color: #f4f0e8;
+  text-align: center;
+  background: #0b0b0d;
+  font-size: .72rem;
+}
+
+@keyframes room-enter {
+  from { opacity: 0; clip-path: circle(0% at 50% 50%); }
+  to { opacity: 1; clip-path: circle(150% at 50% 50%); }
+}
+
+@media (max-width: 720px) {
+  .door-experience-hud p { max-width: 14rem; line-height: 1.55; }
+}

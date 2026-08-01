@@ -165,14 +165,11 @@ function PortalHall({ hovered, setHovered, onSelect }) {
   </>;
 }
 
-function UniverseHub() {
+function UniverseHub({ onMemberSelect }) {
   const [hovered, setHovered] = useState(null);
-  const [teleporting, setTeleporting] = useState(null);
-  const [activeUniverse, setActiveUniverse] = useState(null);
   const active = universePortals.find((portal) => portal.id === hovered);
   const enterPortal = (portal) => {
-    if (portal.destination === 'lara') setActiveUniverse('lara');
-    else setTeleporting(portal);
+    onMemberSelect?.(portal);
   };
   return <section className="afterglow-section universe-hub" aria-label="Entrance to the six Katseye universes">
     <div className="universe-hub-stage">
@@ -183,10 +180,6 @@ function UniverseHub() {
       <div className="universe-hub-intro" aria-hidden="true"><span>THE SIX WORLDS</span><i /></div>
       <div className={`universe-name-reveal ${active ? 'is-visible' : ''}`} aria-live="polite"><span>UNIVERSE / {active ? active.id.toUpperCase() : '—'}</span><strong>{active?.name || ' '}</strong></div>
       <div className="universe-hub-note" aria-hidden="true">APPROACH A GATEWAY</div>
-      {teleporting && <div className="portal-teleport" role="button" tabIndex={0} aria-label={`Return from ${teleporting.name} placeholder`} onClick={() => setTeleporting(null)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') setTeleporting(null); }}>
-        <div className="portal-teleport-core" style={{ '--portal-color': teleporting.color }}><span>TRANSMISSION OPEN</span><strong>{teleporting.name.toUpperCase()}</strong><p>THIS UNIVERSE IS FORMING</p></div>
-      </div>}
-      {activeUniverse === 'lara' && <LaraUniverse onExit={() => setActiveUniverse(null)} />}
     </div>
   </section>;
 }
@@ -460,7 +453,7 @@ function LightstickCanvas({ progressRef, frozen = false, className = '' }) {
   </Canvas>;
 }
 
-export default function LightstickExperience() {
+export default function LightstickExperience({ onMemberSelect }) {
   const sequenceRef = useRef();
   const pinRef = useRef();
   const galleryOverlayRef = useRef();
@@ -530,6 +523,6 @@ export default function LightstickExperience() {
       <section className="lightstick-scene-section" id="section-4" aria-label="Section 4: lightstick rotations" />
       <section className="lightstick-scene-section" id="section-5" aria-label="Section 5: lightstick impact" />
     </div>
-    <UniverseHub />
+    <UniverseHub onMemberSelect={onMemberSelect} />
   </>;
 }

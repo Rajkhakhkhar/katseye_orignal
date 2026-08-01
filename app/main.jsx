@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import LightstickExperience from './LightstickExperience';
+import DoorExperience from './components/DoorExperience';
 import './styles.css';
 
 const heroGirls = [
@@ -57,6 +58,8 @@ function App() {
   const [heroLocked, setHeroLocked] = useState(false);
   const [era, setEra] = useState(null);
   const [bossCursor, setBossCursor] = useState({ x: -100, y: -100, visible: false });
+  const [activeMemberRoom, setActiveMemberRoom] = useState(null);
+  const memberRoomScrollY = useRef(0);
 
   useEffect(() => {
     const update = () => {
@@ -69,6 +72,21 @@ function App() {
     window.addEventListener('scroll', update, { passive: true });
     return () => window.removeEventListener('scroll', update);
   }, [heroLocked]);
+
+  useEffect(() => {
+    if (!activeMemberRoom) return undefined;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.requestAnimationFrame(() => window.scrollTo({ top: memberRoomScrollY.current, behavior: 'auto' }));
+    };
+  }, [activeMemberRoom]);
+
+  const openMemberRoom = (member) => {
+    memberRoomScrollY.current = window.scrollY;
+    setActiveMemberRoom(member);
+  };
 
   const currentEra = eraData[era || 'default'];
   const cursorAsset = era === 'sis' ? '/cursor-flower.png' : era === 'chaos' ? '/cursor-knife.png' : era === 'wild' ? '/cursor-paw.png' : null;
@@ -140,7 +158,8 @@ function App() {
       {cursorAsset && <div className={`era-cursor era-cursor-${era} ${bossCursor.visible ? 'is-visible' : ''}`} style={{ left: bossCursor.x, top: bossCursor.y }} aria-hidden="true"><img src={cursorAsset} alt="" /></div>}
     </section>
 
-    <LightstickExperience />
+    <LightstickExperience onMemberSelect={openMemberRoom} />
+    {activeMemberRoom && <DoorExperience member={activeMemberRoom} onExit={() => setActiveMemberRoom(null)} />}
     <footer><span>KATSEYE / UNOFFICIAL FAN PROJECT</span><span>2026</span><span>MADE TO MOVE</span></footer>
   </main>;
 }

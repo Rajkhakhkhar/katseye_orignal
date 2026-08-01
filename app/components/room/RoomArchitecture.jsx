@@ -67,22 +67,26 @@ function LuxuryArchitecturalShell({ roomCenterZ }) {
 
 function BackWallCenterpiece() {
   const stageZ = ROOM.backWallZ + .95;
+  const stageWidth = 6.2;
+  const stageDepth = 1.6;
+  const stageHeight = .18;
+  const platformHeight = .12;
   return <>
     <group>
-      <mesh position={[0, .12, stageZ]}>
-        <boxGeometry args={[6.65, .24, 1.75]} />
+      <mesh position={[0, stageHeight / 2, stageZ]}>
+        <boxGeometry args={[stageWidth, stageHeight, stageDepth]} />
         <meshPhysicalMaterial color="#2a201c" metalness={.36} roughness={.5} clearcoat={.12} />
       </mesh>
-      <mesh position={[0, .265, stageZ - .04]}>
-        <boxGeometry args={[5.85, .06, 1.3]} />
+      <mesh position={[0, stageHeight + .03, stageZ - .04]}>
+        <boxGeometry args={[5.55, .06, 1.18]} />
         <ArchitecturalMetal color="#8f6b52" />
       </mesh>
-      <mesh position={[0, .4, stageZ]}>
-        <cylinderGeometry args={[1.82, 1.92, .19, 64]} />
+      <mesh position={[0, stageHeight + platformHeight / 2, stageZ]}>
+        <cylinderGeometry args={[1.72, 1.82, platformHeight, 64]} />
         <meshPhysicalMaterial color="#211917" metalness={.5} roughness={.36} clearcoat={.22} clearcoatRoughness={.28} />
       </mesh>
-      <mesh position={[0, .505, stageZ]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[1.67, .035, 8, 64]} />
+      <mesh position={[0, stageHeight + platformHeight + .005, stageZ]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[1.57, .035, 8, 64]} />
         <ArchitecturalMetal color="#b88c67" />
       </mesh>
     </group>
