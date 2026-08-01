@@ -18,6 +18,53 @@ function RoseGoldArchitecturalTrim({ roomCenterZ }) {
   </>;
 }
 
+function ArchitecturalMetal({ color = '#af8463' }) {
+  return <meshPhysicalMaterial color={color} metalness={.84} roughness={.3} clearcoat={.18} clearcoatRoughness={.22} />;
+}
+
+function SideWallPanel({ side, z }) {
+  const x = side * (ROOM.width / 2 - .015);
+  const trimX = side * (ROOM.width / 2 - .055);
+  return <group>
+    <mesh position={[x, 2.52, z]}>
+      <boxGeometry args={[.03, 3.82, 3.75]} />
+      <meshStandardMaterial color="#271f1b" metalness={.12} roughness={.86} />
+    </mesh>
+    <mesh position={[trimX, 2.52, z - 1.84]}><boxGeometry args={[.045, 3.9, .055]} /><ArchitecturalMetal /></mesh>
+    <mesh position={[trimX, 2.52, z + 1.84]}><boxGeometry args={[.045, 3.9, .055]} /><ArchitecturalMetal /></mesh>
+    <mesh position={[trimX, .61, z]}><boxGeometry args={[.045, .055, 3.74]} /><ArchitecturalMetal /></mesh>
+    <mesh position={[trimX, 4.43, z]}><boxGeometry args={[.045, .055, 3.74]} /><ArchitecturalMetal /></mesh>
+  </group>;
+}
+
+function LuxuryArchitecturalShell({ roomCenterZ }) {
+  const panelCenters = [ROOM.entranceZ - 3.3, ROOM.entranceZ - 8.05, ROOM.entranceZ - 12.8];
+  return <>
+    <mesh position={[-ROOM.width / 2 + .065, .19, roomCenterZ]}><boxGeometry args={[.12, .22, ROOM.length]} /><ArchitecturalMetal color="#8f6b52" /></mesh>
+    <mesh position={[ROOM.width / 2 - .065, .19, roomCenterZ]}><boxGeometry args={[.12, .22, ROOM.length]} /><ArchitecturalMetal color="#8f6b52" /></mesh>
+    <mesh position={[0, .19, ROOM.backWallZ + .045]}><boxGeometry args={[ROOM.width, .22, .12]} /><ArchitecturalMetal color="#8f6b52" /></mesh>
+
+    {panelCenters.map((z) => <group key={z}>
+      <SideWallPanel side={-1} z={z} />
+      <SideWallPanel side={1} z={z} />
+    </group>)}
+
+    <mesh position={[0, 2.55, ROOM.backWallZ + .02]}>
+      <boxGeometry args={[5.9, 3.75, .035]} />
+      <meshStandardMaterial color="#251d19" metalness={.14} roughness={.82} />
+    </mesh>
+    <mesh position={[-2.96, 2.55, ROOM.backWallZ + .065]}><boxGeometry args={[.06, 3.9, .055]} /><ArchitecturalMetal /></mesh>
+    <mesh position={[2.96, 2.55, ROOM.backWallZ + .065]}><boxGeometry args={[.06, 3.9, .055]} /><ArchitecturalMetal /></mesh>
+    <mesh position={[0, .62, ROOM.backWallZ + .065]}><boxGeometry args={[5.96, .055, .055]} /><ArchitecturalMetal /></mesh>
+    <mesh position={[0, 4.48, ROOM.backWallZ + .065]}><boxGeometry args={[5.96, .055, .055]} /><ArchitecturalMetal /></mesh>
+
+    <mesh position={[0, ROOM.height - .035, roomCenterZ]}><boxGeometry args={[6.75, .07, ROOM.length - 1.1]} /><meshStandardMaterial color="#201917" metalness={.2} roughness={.8} /></mesh>
+    <mesh position={[-3.42, ROOM.height - .08, roomCenterZ]}><boxGeometry args={[.055, .08, ROOM.length - 1.1]} /><ArchitecturalMetal /></mesh>
+    <mesh position={[3.42, ROOM.height - .08, roomCenterZ]}><boxGeometry args={[.055, .08, ROOM.length - 1.1]} /><ArchitecturalMetal /></mesh>
+    {[ROOM.entranceZ - 2.2, ROOM.entranceZ - 7.5, ROOM.entranceZ - 12.8, ROOM.entranceZ - 18.1].map((z) => <mesh key={z} position={[0, ROOM.height - .08, z]}><boxGeometry args={[6.9, .08, .06]} /><ArchitecturalMetal /></mesh>)}
+  </>;
+}
+
 export default function RoomArchitecture({ member }) {
   const isLara = member.id === 'lara';
   const accent = isLara ? '#b76e79' : member.color || '#d6d6dc';
@@ -50,6 +97,8 @@ export default function RoomArchitecture({ member }) {
       <planeGeometry args={[ROOM.width, ROOM.height]} />
       <meshPhysicalMaterial color={isLara ? '#d0a060' : '#18181a'} map={laraMaps?.backWall.color} bumpMap={laraMaps?.backWall.bump} bumpScale={isLara ? .16 : 0} roughnessMap={laraMaps?.backWall.roughness} roughness={isLara ? .68 : .94} metalness={isLara ? .06 : 0} sheen={isLara ? .14 : 0} sheenColor="#d7a46d" sheenRoughness={.8} side={THREE.DoubleSide} />
     </mesh>
+
+    <LuxuryArchitecturalShell roomCenterZ={roomCenterZ} />
 
     {!isLara && sideFrames.map(([side, z], index) => <EmptyFrame
       key={`${side}-${z}`}
