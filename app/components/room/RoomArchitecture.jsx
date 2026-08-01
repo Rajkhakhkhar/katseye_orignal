@@ -65,6 +65,41 @@ function LuxuryArchitecturalShell({ roomCenterZ }) {
   </>;
 }
 
+function BackWallCenterpiece() {
+  const stageZ = ROOM.backWallZ + .95;
+  return <>
+    <group>
+      <mesh position={[0, .12, stageZ]}>
+        <boxGeometry args={[6.65, .24, 1.75]} />
+        <meshPhysicalMaterial color="#2a201c" metalness={.36} roughness={.5} clearcoat={.12} />
+      </mesh>
+      <mesh position={[0, .265, stageZ - .04]}>
+        <boxGeometry args={[5.85, .06, 1.3]} />
+        <ArchitecturalMetal color="#8f6b52" />
+      </mesh>
+      <mesh position={[0, .4, stageZ]}>
+        <cylinderGeometry args={[1.82, 1.92, .19, 64]} />
+        <meshPhysicalMaterial color="#211917" metalness={.5} roughness={.36} clearcoat={.22} clearcoatRoughness={.28} />
+      </mesh>
+      <mesh position={[0, .505, stageZ]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[1.67, .035, 8, 64]} />
+        <ArchitecturalMetal color="#b88c67" />
+      </mesh>
+    </group>
+
+    <group>
+      <mesh position={[0, 2.35, ROOM.backWallZ + .075]}>
+        <boxGeometry args={[4.65, 2.92, .08]} />
+        <meshStandardMaterial color="#171211" metalness={.22} roughness={.83} />
+      </mesh>
+      <mesh position={[-2.32, 2.35, ROOM.backWallZ + .27]}><boxGeometry args={[.18, 3.12, .38]} /><ArchitecturalMetal color="#987456" /></mesh>
+      <mesh position={[2.32, 2.35, ROOM.backWallZ + .27]}><boxGeometry args={[.18, 3.12, .38]} /><ArchitecturalMetal color="#987456" /></mesh>
+      <mesh position={[0, 3.88, ROOM.backWallZ + .27]}><boxGeometry args={[4.82, .18, .38]} /><ArchitecturalMetal color="#987456" /></mesh>
+      <mesh position={[0, .82, ROOM.backWallZ + .27]}><boxGeometry args={[4.82, .18, .38]} /><ArchitecturalMetal color="#987456" /></mesh>
+    </group>
+  </>;
+}
+
 export default function RoomArchitecture({ member }) {
   const isLara = member.id === 'lara';
   const accent = isLara ? '#b76e79' : member.color || '#d6d6dc';
@@ -99,6 +134,7 @@ export default function RoomArchitecture({ member }) {
     </mesh>
 
     <LuxuryArchitecturalShell roomCenterZ={roomCenterZ} />
+    <BackWallCenterpiece />
 
     {!isLara && sideFrames.map(([side, z], index) => <EmptyFrame
       key={`${side}-${z}`}
