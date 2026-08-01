@@ -8,7 +8,12 @@ const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 export default function PlayerControls({ onReady }) {
   const { camera, gl } = useThree();
   const input = useRef(new Set());
-  const view = useRef({ yaw: 0, pitch: 0, velocity: new THREE.Vector3() });
+  const view = useRef({
+    yaw: 0,
+    pitch: 0,
+    velocity: new THREE.Vector3(),
+    scrollTarget: ROOM.entranceZ - 1.15,
+  });
   const hasEntered = useRef(false);
 
   useEffect(() => {
@@ -28,15 +33,26 @@ export default function PlayerControls({ onReady }) {
     const requestControl = () => {
       if (hasEntered.current && document.pointerLockElement !== canvas) canvas.requestPointerLock?.();
     };
+    const onWheel = (event) => {
+      if (!hasEntered.current) return;
+      event.preventDefault();
+      view.current.scrollTarget = clamp(
+        view.current.scrollTarget - event.deltaY * .0022,
+        ROOM.backWallZ + 1.25,
+        ROOM.entranceZ - .45,
+      );
+    };
     window.addEventListener('keydown', onKeyDown, { passive: false });
     window.addEventListener('keyup', onKeyUp);
     canvas.addEventListener('mousemove', onMouseMove);
     canvas.addEventListener('click', requestControl);
+    canvas.addEventListener('wheel', onWheel, { passive: false });
     return () => {
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('keyup', onKeyUp);
       canvas.removeEventListener('mousemove', onMouseMove);
       canvas.removeEventListener('click', requestControl);
+      canvas.removeEventListener('wheel', onWheel);
       if (document.pointerLockElement === canvas) document.exitPointerLock?.();
     };
   }, [gl]);
@@ -69,8 +85,13 @@ export default function PlayerControls({ onReady }) {
     if (desired.lengthSq() > 0) desired.normalize().multiplyScalar(3.4);
     controls.velocity.lerp(desired, 1 - Math.exp(-10 * delta));
 
+    controls.scrollTarget = clamp(
+      controls.scrollTarget + controls.velocity.z * delta,
+      ROOM.backWallZ + 1.25,
+      ROOM.entranceZ - .45,
+    );
     const nextX = clamp(camera.position.x + controls.velocity.x * delta, -3.5, 3.5);
-    const nextZ = clamp(camera.position.z + controls.velocity.z * delta, ROOM.backWallZ + 1.25, ROOM.entranceZ - 0.45);
+    const nextZ = THREE.MathUtils.damp(camera.position.z, controls.scrollTarget, 5.2, delta);
     camera.position.set(nextX, ROOM.cameraHeight, nextZ);
   });
 
