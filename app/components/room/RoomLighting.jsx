@@ -2,14 +2,21 @@ import { ROOM } from './roomConfig';
 
 export default function RoomLighting({ isLara }) {
   if (isLara) return <>
-    <ambientLight color="#76513a" intensity={.58} />
-    <hemisphereLight args={['#d9a768', '#130b08', .48]} />
-    <pointLight position={[-3.45, .5, 4.2]} color="#c98b4e" intensity={.95} distance={6.8} decay={2} />
-    <pointLight position={[3.45, .5, -.8]} color="#b76e79" intensity={.82} distance={6.1} decay={2} />
-    <pointLight position={[-3.45, .55, -6.4]} color="#9b5e31" intensity={.72} distance={5.6} decay={2} />
-    <pointLight position={[3.3, 3.85, -7.1]} color="#f4bd7c" intensity={.7} distance={4.4} decay={2} />
-    <spotLight position={[0, 4.72, 2.8]} target-position={[0, 1.7, -4.2]} color="#f8c98f" intensity={1.7} angle={.62} penumbra={1} distance={15} />
-    <spotLight position={[0, 4.62, -7.8]} target-position={[0, 1.9, ROOM.backWallZ]} color="#dca070" intensity={1.05} angle={.5} penumbra={1} distance={6.2} />
+    <ambientLight color="#b28f71" intensity={.82} />
+    <hemisphereLight args={['#f4cfaa', '#241915', .62]} />
+
+    <pointLight position={[0, 4.35, 5.4]} color="#f5d0a5" intensity={1.35} distance={9.2} decay={2} />
+    <pointLight position={[0, 4.35, .15]} color="#edbe8e" intensity={1.15} distance={8.6} decay={2} />
+    <pointLight position={[0, 4.35, -5.1]} color="#e8b888" intensity={1.08} distance={8.2} decay={2} />
+
+    <pointLight position={[-3.35, 2.45, 3.1]} color="#dca673" intensity={.72} distance={5.8} decay={2} />
+    <pointLight position={[3.35, 2.45, -.7]} color="#d9a476" intensity={.66} distance={5.8} decay={2} />
+    <pointLight position={[-3.25, 2.25, -5.25]} color="#c99469" intensity={.54} distance={5.2} decay={2} />
+    <pointLight position={[3.25, 2.25, -5.25]} color="#c99469" intensity={.54} distance={5.2} decay={2} />
+
+    <pointLight position={[0, 3.55, ROOM.backWallZ + 1.05]} color="#f0c493" intensity={1.28} distance={6.4} decay={2} />
+    <pointLight position={[-2.45, 2.75, ROOM.backWallZ + 1.25]} color="#c99469" intensity={.46} distance={4.3} decay={2} />
+    <pointLight position={[2.45, 2.75, ROOM.backWallZ + 1.25]} color="#c99469" intensity={.46} distance={4.3} decay={2} />
   </>;
 
   return <>
