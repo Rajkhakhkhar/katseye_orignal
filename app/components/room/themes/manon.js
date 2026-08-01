@@ -1,6 +1,2 @@
-export default Object.freeze({
-  id: 'manon',
-  lightingPreset: 'neutral-current',
-  layoutPreset: 'master',
-  content: {},
-});
+import { createNeutralMemberTheme } from './baseTheme';
+export default createNeutralMemberTheme('manon');

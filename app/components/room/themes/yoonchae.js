@@ -1,6 +1,2 @@
-export default Object.freeze({
-  id: 'yoonchae',
-  lightingPreset: 'neutral-current',
-  layoutPreset: 'master',
-  content: {},
-});
+import { createNeutralMemberTheme } from './baseTheme';
+export default createNeutralMemberTheme('yoonchae');

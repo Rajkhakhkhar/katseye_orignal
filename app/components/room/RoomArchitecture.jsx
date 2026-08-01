@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { useRoomSurfaceMaps } from './RoomMaterials';
-import EmptyFrame from './RoomFrames';
+import { AdaptiveFrameGallery } from './RoomFrames';
 import { ROOM } from './roomConfig';
 
 function RoseGoldTrimMaterial() {
@@ -22,13 +22,28 @@ function ArchitecturalMetal({ color = '#a8b0b8' }) {
   return <meshPhysicalMaterial color={color} metalness={.72} roughness={.38} clearcoat={.12} clearcoatRoughness={.34} />;
 }
 
-function SideWallPanel({ side, z }) {
+function SurfaceMaterial({ surface, fallbackColor, roughness, bumpScale, doubleSided = false }) {
+  const profile = surface?.material;
+  return <meshPhysicalMaterial
+    color={profile?.color || fallbackColor}
+    map={surface?.color}
+    bumpMap={surface?.bump}
+    bumpScale={profile?.bumpScale ?? bumpScale}
+    roughnessMap={surface?.roughness}
+    roughness={profile?.roughness ?? roughness}
+    metalness={0}
+    clearcoat={0}
+    side={doubleSided ? THREE.DoubleSide : THREE.FrontSide}
+  />;
+}
+
+function SideWallPanel({ side, z, textureSurface, isTextile }) {
   const x = side * (ROOM.width / 2 - .015);
   const trimX = side * (ROOM.width / 2 - .055);
   return <group>
     <mesh position={[x, 2.52, z]}>
       <boxGeometry args={[.03, 3.82, 3.75]} />
-      <meshStandardMaterial color="#4e5862" metalness={.08} roughness={.82} />
+      {isTextile ? <SurfaceMaterial surface={textureSurface} fallbackColor="#4e5862" roughness={.82} bumpScale={.027} /> : <meshStandardMaterial color="#4e5862" metalness={.08} roughness={.82} />}
     </mesh>
     <mesh position={[trimX, 2.52, z - 1.84]}><boxGeometry args={[.045, 3.9, .055]} /><ArchitecturalMetal /></mesh>
     <mesh position={[trimX, 2.52, z + 1.84]}><boxGeometry args={[.045, 3.9, .055]} /><ArchitecturalMetal /></mesh>
@@ -37,7 +52,7 @@ function SideWallPanel({ side, z }) {
   </group>;
 }
 
-function LuxuryArchitecturalShell({ roomCenterZ }) {
+function LuxuryArchitecturalShell({ roomCenterZ, surfaces, isTextile }) {
   const panelCenters = [ROOM.entranceZ - 3.3, ROOM.entranceZ - 8.05, ROOM.entranceZ - 12.8];
   return <>
     <mesh position={[-ROOM.width / 2 + .065, .19, roomCenterZ]}><boxGeometry args={[.12, .22, ROOM.length]} /><ArchitecturalMetal color="#7e8892" /></mesh>
@@ -45,20 +60,23 @@ function LuxuryArchitecturalShell({ roomCenterZ }) {
     <mesh position={[0, .19, ROOM.backWallZ + .045]}><boxGeometry args={[ROOM.width, .22, .12]} /><ArchitecturalMetal color="#7e8892" /></mesh>
 
     {panelCenters.map((z) => <group key={z}>
-      <SideWallPanel side={-1} z={z} />
-      <SideWallPanel side={1} z={z} />
+      <SideWallPanel side={-1} z={z} textureSurface={surfaces.sideWall} isTextile={isTextile} />
+      <SideWallPanel side={1} z={z} textureSurface={surfaces.sideWall} isTextile={isTextile} />
     </group>)}
 
     <mesh position={[0, 2.55, ROOM.backWallZ + .02]}>
       <boxGeometry args={[5.9, 3.75, .035]} />
-      <meshStandardMaterial color="#48525c" metalness={.12} roughness={.8} />
+      {isTextile ? <SurfaceMaterial surface={surfaces.backWall} fallbackColor="#48525c" roughness={.8} bumpScale={.027} /> : <meshStandardMaterial color="#48525c" metalness={.08} roughness={.82} />}
     </mesh>
     <mesh position={[-2.96, 2.55, ROOM.backWallZ + .065]}><boxGeometry args={[.06, 3.9, .055]} /><ArchitecturalMetal /></mesh>
     <mesh position={[2.96, 2.55, ROOM.backWallZ + .065]}><boxGeometry args={[.06, 3.9, .055]} /><ArchitecturalMetal /></mesh>
     <mesh position={[0, .62, ROOM.backWallZ + .065]}><boxGeometry args={[5.96, .055, .055]} /><ArchitecturalMetal /></mesh>
     <mesh position={[0, 4.48, ROOM.backWallZ + .065]}><boxGeometry args={[5.96, .055, .055]} /><ArchitecturalMetal /></mesh>
 
-    <mesh position={[0, ROOM.height - .035, roomCenterZ]}><boxGeometry args={[6.75, .07, ROOM.length - 1.1]} /><meshStandardMaterial color="#59636d" metalness={.16} roughness={.82} /></mesh>
+    <mesh position={[0, ROOM.height - .035, roomCenterZ]}>
+      <boxGeometry args={[6.75, .07, ROOM.length - 1.1]} />
+      {isTextile ? <SurfaceMaterial surface={surfaces.ceiling} fallbackColor="#59636d" roughness={.82} bumpScale={.018} /> : <meshStandardMaterial color="#59636d" metalness={.16} roughness={.82} />}
+    </mesh>
     <mesh position={[-3.42, ROOM.height - .08, roomCenterZ]}><boxGeometry args={[.055, .08, ROOM.length - 1.1]} /><ArchitecturalMetal /></mesh>
     <mesh position={[3.42, ROOM.height - .08, roomCenterZ]}><boxGeometry args={[.055, .08, ROOM.length - 1.1]} /><ArchitecturalMetal /></mesh>
     {[ROOM.entranceZ - 2.2, ROOM.entranceZ - 7.5, ROOM.entranceZ - 12.8, ROOM.entranceZ - 18.1].map((z) => <mesh key={z} position={[0, ROOM.height - .08, z]}><boxGeometry args={[6.9, .08, .06]} /><ArchitecturalMetal /></mesh>)}
@@ -73,29 +91,13 @@ function BackWallCenterpiece() {
   const platformHeight = .12;
   return <>
     <group>
-      <mesh position={[0, stageHeight / 2, stageZ]}>
-        <boxGeometry args={[stageWidth, stageHeight, stageDepth]} />
-        <meshPhysicalMaterial color="#59636c" metalness={.26} roughness={.52} clearcoat={.08} />
-      </mesh>
-      <mesh position={[0, stageHeight + .03, stageZ - .04]}>
-        <boxGeometry args={[5.55, .06, 1.18]} />
-        <ArchitecturalMetal color="#8a949e" />
-      </mesh>
-      <mesh position={[0, stageHeight + platformHeight / 2, stageZ]}>
-        <cylinderGeometry args={[1.72, 1.82, platformHeight, 64]} />
-        <meshPhysicalMaterial color="#3f4852" metalness={.4} roughness={.42} clearcoat={.16} clearcoatRoughness={.34} />
-      </mesh>
-      <mesh position={[0, stageHeight + platformHeight + .005, stageZ]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[1.57, .035, 8, 64]} />
-        <ArchitecturalMetal color="#aeb6bd" />
-      </mesh>
+      <mesh position={[0, stageHeight / 2, stageZ]}><boxGeometry args={[stageWidth, stageHeight, stageDepth]} /><meshPhysicalMaterial color="#59636c" metalness={.26} roughness={.52} clearcoat={.08} /></mesh>
+      <mesh position={[0, stageHeight + .03, stageZ - .04]}><boxGeometry args={[5.55, .06, 1.18]} /><ArchitecturalMetal color="#8a949e" /></mesh>
+      <mesh position={[0, stageHeight + platformHeight / 2, stageZ]}><cylinderGeometry args={[1.72, 1.82, platformHeight, 64]} /><meshPhysicalMaterial color="#3f4852" metalness={.4} roughness={.42} clearcoat={.16} clearcoatRoughness={.34} /></mesh>
+      <mesh position={[0, stageHeight + platformHeight + .005, stageZ]} rotation={[Math.PI / 2, 0, 0]}><torusGeometry args={[1.57, .035, 8, 64]} /><ArchitecturalMetal color="#aeb6bd" /></mesh>
     </group>
-
     <group>
-      <mesh position={[0, 2.35, ROOM.backWallZ + .075]}>
-        <boxGeometry args={[4.65, 2.92, .08]} />
-        <meshStandardMaterial color="#3d4751" metalness={.18} roughness={.8} />
-      </mesh>
+      <mesh position={[0, 2.35, ROOM.backWallZ + .075]}><boxGeometry args={[4.65, 2.92, .08]} /><meshStandardMaterial color="#3d4751" metalness={.18} roughness={.8} /></mesh>
       <mesh position={[-2.32, 2.35, ROOM.backWallZ + .27]}><boxGeometry args={[.18, 3.12, .38]} /><ArchitecturalMetal color="#87919b" /></mesh>
       <mesh position={[2.32, 2.35, ROOM.backWallZ + .27]}><boxGeometry args={[.18, 3.12, .38]} /><ArchitecturalMetal color="#87919b" /></mesh>
       <mesh position={[0, 3.88, ROOM.backWallZ + .27]}><boxGeometry args={[4.82, .18, .38]} /><ArchitecturalMetal color="#87919b" /></mesh>
@@ -104,49 +106,37 @@ function BackWallCenterpiece() {
   </>;
 }
 
-export default function RoomArchitecture({ member }) {
-  const isLara = member.id === 'lara';
-  const accent = isLara ? '#b76e79' : member.color || '#d6d6dc';
-  const laraMaps = useRoomSurfaceMaps();
+export default function RoomArchitecture({ theme }) {
+  const surfacePreset = theme?.surfacePreset || 'base-neutral';
+  const surfaces = useRoomSurfaceMaps(surfacePreset);
+  const isTextile = surfacePreset === 'lara-cheetah-temp' && Boolean(surfaces.floor.material);
   const roomCenterZ = ROOM.entranceZ - ROOM.length / 2;
-  const sideFrames = [
-    [-1, ROOM.entranceZ - 2], [1, ROOM.entranceZ - 2],
-    [-1, ROOM.entranceZ - 6.25], [1, ROOM.entranceZ - 6.25],
-    [-1, ROOM.entranceZ - 10.5], [1, ROOM.entranceZ - 10.5],
-  ];
 
   return <>
     <mesh position={[0, 0, roomCenterZ]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
       <planeGeometry args={[ROOM.width, ROOM.length]} />
-      <meshPhysicalMaterial color="#87919b" map={laraMaps.floor.color} bumpMap={laraMaps.floor.bump} bumpScale={.08} roughnessMap={laraMaps.floor.roughness} roughness={.62} metalness={.08} clearcoat={.06} clearcoatRoughness={.54} />
+      <SurfaceMaterial surface={surfaces.floor} fallbackColor="#87919b" roughness={.62} bumpScale={.08} />
     </mesh>
     <mesh position={[0, ROOM.height, roomCenterZ]} rotation={[Math.PI / 2, 0, 0]}>
       <planeGeometry args={[ROOM.width, ROOM.length]} />
-      <meshPhysicalMaterial color="#aeb5bb" map={laraMaps.ceiling.color} bumpMap={laraMaps.ceiling.bump} bumpScale={.05} roughnessMap={laraMaps.ceiling.roughness} roughness={.88} metalness={.03} side={THREE.DoubleSide} />
+      <SurfaceMaterial surface={surfaces.ceiling} fallbackColor="#aeb5bb" roughness={.88} bumpScale={.05} doubleSided />
     </mesh>
     <mesh position={[-ROOM.width / 2, ROOM.height / 2, roomCenterZ]} rotation={[0, Math.PI / 2, 0]}>
       <planeGeometry args={[ROOM.length, ROOM.height]} />
-      <meshPhysicalMaterial color="#87919a" map={laraMaps.sideWall.color} bumpMap={laraMaps.sideWall.bump} bumpScale={.07} roughnessMap={laraMaps.sideWall.roughness} roughness={.8} metalness={.05} side={THREE.DoubleSide} />
+      <SurfaceMaterial surface={surfaces.sideWall} fallbackColor="#87919a" roughness={.8} bumpScale={.07} doubleSided />
     </mesh>
     <mesh position={[ROOM.width / 2, ROOM.height / 2, roomCenterZ]} rotation={[0, -Math.PI / 2, 0]}>
       <planeGeometry args={[ROOM.length, ROOM.height]} />
-      <meshPhysicalMaterial color="#87919a" map={laraMaps.sideWall.color} bumpMap={laraMaps.sideWall.bump} bumpScale={.07} roughnessMap={laraMaps.sideWall.roughness} roughness={.8} metalness={.05} side={THREE.DoubleSide} />
+      <SurfaceMaterial surface={surfaces.sideWall} fallbackColor="#87919a" roughness={.8} bumpScale={.07} doubleSided />
     </mesh>
     <mesh position={[0, ROOM.height / 2, ROOM.backWallZ]}>
       <planeGeometry args={[ROOM.width, ROOM.height]} />
-      <meshPhysicalMaterial color="#78828c" map={laraMaps.backWall.color} bumpMap={laraMaps.backWall.bump} bumpScale={.07} roughnessMap={laraMaps.backWall.roughness} roughness={.81} metalness={.06} side={THREE.DoubleSide} />
+      <SurfaceMaterial surface={surfaces.backWall} fallbackColor="#78828c" roughness={.81} bumpScale={.07} doubleSided />
     </mesh>
 
-    <LuxuryArchitecturalShell roomCenterZ={roomCenterZ} />
+    <LuxuryArchitecturalShell roomCenterZ={roomCenterZ} surfaces={surfaces} isTextile={isTextile} />
     <BackWallCenterpiece />
-
-    {!isLara && sideFrames.map(([side, z], index) => <EmptyFrame
-      key={`${side}-${z}`}
-      position={[side * (ROOM.width / 2 - 0.025), 2.1, z]}
-      rotation={[0, side === -1 ? Math.PI / 2 : -Math.PI / 2, 0]}
-      accent={index % 2 ? '#73737a' : accent}
-    />)}
-    {!isLara && <EmptyFrame position={[0, 2.25, ROOM.backWallZ + 0.02]} rotation={[0, 0, 0]} accent={accent} hero />}
-    {isLara && <RoseGoldArchitecturalTrim roomCenterZ={roomCenterZ} />}
+    <RoseGoldArchitecturalTrim roomCenterZ={roomCenterZ} />
+    <AdaptiveFrameGallery frames={theme?.frames} frameStyle={theme?.frameStyle} />
   </>;
 }

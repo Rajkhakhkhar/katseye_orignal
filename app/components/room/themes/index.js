@@ -4,14 +4,10 @@ import daniela from './daniela';
 import megan from './megan';
 import manon from './manon';
 import yoonchae from './yoonchae';
+import { baseTheme } from './baseTheme';
 
 const themes = Object.freeze({ lara, sophia, daniela, megan, manon, yoonchae });
-const fallback = Object.freeze({
-  id: 'default',
-  lightingPreset: 'neutral-current',
-  layoutPreset: 'master',
-  content: {},
-});
+const fallback = Object.freeze({ ...baseTheme, id: 'default' });
 
 export function getMemberRoomTheme(member) {
   return themes[member?.id] || fallback;
