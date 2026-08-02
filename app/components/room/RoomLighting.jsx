@@ -19,21 +19,68 @@ function BaseGalleryLighting() {
   </>;
 }
 
+function HiddenPerimeterLeds() {
+  const runs = [6.6, 2.1, -2.4, -6.9];
+  return <>
+    {[-1, 1].flatMap((side) => runs.map((z) => (
+      <pointLight
+        key={`${side}-${z}`}
+        position={[side * 3.5, 4.66, z]}
+        color="#e7ad64"
+        intensity={.34}
+        distance={4.3}
+        decay={2}
+      />
+    )))}
+    {[-2.35, 0, 2.35].map((x) => (
+      <pointLight key={x} position={[x, 4.64, ROOM.backWallZ + .5]} color="#e7ad64" intensity={.28} distance={3.6} decay={2} />
+    ))}
+  </>;
+}
+
+function SoftWallWashes() {
+  const zones = [4.4, -.55, -5.25];
+  return <>
+    {[-1, 1].flatMap((side) => zones.map((z) => (
+      <pointLight
+        key={`${side}-${z}`}
+        position={[side * 3.18, 2.75, z]}
+        color="#dcb47d"
+        intensity={.42}
+        distance={5.5}
+        decay={2}
+      />
+    )))}
+  </>;
+}
+
+function DisplayAccents() {
+  return <>
+    <pointLight position={[-3.14, 2.08, -1.9]} color="#e5ad65" intensity={.42} distance={3.25} decay={2} />
+    <pointLight position={[3.14, 2.05, -1.45]} color="#e5ad65" intensity={.36} distance={3.2} decay={2} />
+    <pointLight position={[3.12, 1.36, -5.85]} color="#dba461" intensity={.32} distance={2.9} decay={2} />
+  </>;
+}
+
 function LaraGalleryLighting() {
   return <>
-    <ambientLight color="#c9b69a" intensity={1.08} />
-    <hemisphereLight args={['#f3e3cb', '#4b4035', .95]} />
-    <pointLight position={[0, 4.26, 5.35]} color="#fff6e8" intensity={2} distance={13.5} decay={2} />
-    <pointLight position={[0, 4.2, -.2]} color="#f1eee7" intensity={1.75} distance={13} decay={2} />
-    <pointLight position={[-3.1, 2.85, 3.3]} color="#f6ecdf" intensity={1.15} distance={9.2} decay={2} />
-    <pointLight position={[3.1, 2.85, 3.3]} color="#f6ecdf" intensity={1.15} distance={9.2} decay={2} />
-    <pointLight position={[-3.06, 2.65, -2.4]} color="#e0d9cf" intensity={.9} distance={8.5} decay={2} />
-    <pointLight position={[3.06, 2.65, -2.4]} color="#e0d9cf" intensity={.9} distance={8.5} decay={2} />
-    <pointLight position={[-2.98, 2.45, -6.75]} color="#ded2c0" intensity={.78} distance={7.9} decay={2} />
-    <pointLight position={[2.98, 2.45, -6.75]} color="#ded2c0" intensity={.78} distance={7.9} decay={2} />
-    <pointLight position={[0, 3.48, ROOM.backWallZ + 1.16]} color="#fff9ee" intensity={2.15} distance={10} decay={2} />
-    <pointLight position={[-2.38, 2.55, ROOM.backWallZ + 1.23]} color="#e9dfd1" intensity={.78} distance={7.2} decay={2} />
-    <pointLight position={[2.38, 2.55, ROOM.backWallZ + 1.23]} color="#e9dfd1" intensity={.78} distance={7.2} decay={2} />
+    {/* A quiet champagne fill preserves material detail without flattening the room. */}
+    <ambientLight color="#d9c39d" intensity={.7} />
+    <hemisphereLight args={['#f0d9b5', '#261b15', .64]} />
+
+    {/* Hidden ceiling-edge fixtures: their source is never rendered, only their amber spill. */}
+    <HiddenPerimeterLeds />
+
+    {/* Low-intensity panel washes keep the gallery walls legible while retaining shadowed corners. */}
+    <SoftWallWashes />
+
+    {/* Two restrained layers make the stage the natural destination rather than a hard spotlight. */}
+    <pointLight position={[0, 3.9, ROOM.backWallZ + 1.75]} color="#f1c27f" intensity={1.42} distance={8.6} decay={2} />
+    <pointLight position={[0, 1.35, ROOM.backWallZ + 1.18]} color="#dba460" intensity={.58} distance={5.8} decay={2} />
+    <pointLight position={[-2.16, 2.56, ROOM.backWallZ + 1.48]} color="#dcb278" intensity={.46} distance={5.3} decay={2} />
+    <pointLight position={[2.16, 2.56, ROOM.backWallZ + 1.48]} color="#dcb278" intensity={.46} distance={5.3} decay={2} />
+
+    <DisplayAccents />
   </>;
 }
 
