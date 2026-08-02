@@ -1,10 +1,10 @@
 import { useMemo } from 'react';
 import * as THREE from 'three';
 import { ROOM } from './roomConfig';
+import { LuxuryFashionDisplay, LuxuryGlassDisplayCabinet, MusicExhibit } from './LuxuryExhibits';
 
 const ROSE_GOLD = '#b77b67';
 const GOLD = '#c9924b';
-const DARK_METAL = '#161513';
 
 function RoseGoldMaterial() {
   return <meshPhysicalMaterial color={ROSE_GOLD} metalness={.84} roughness={.28} clearcoat={.08} />;
@@ -68,57 +68,6 @@ function StandingMicrophone() {
   </group>;
 }
 
-function DisplayCabinet({ position, width = 1.65, height = 1.02, shelves = 2 }) {
-  const shelfOffsets = Array.from({ length: shelves }, (_, index) => (index + 1) * height / (shelves + 1) - height / 2);
-  return <group position={position}>
-    <mesh><boxGeometry args={[.36, height, width]} /><meshStandardMaterial color={DARK_METAL} metalness={.42} roughness={.52} /></mesh>
-    {shelfOffsets.map((offset) => <mesh key={offset} position={[.2, offset, 0]}><boxGeometry args={[.03, .035, width * .88]} /><RoseGoldMaterial /></mesh>)}
-    {[-height * .33, 0, height * .33].map((offset) => <mesh key={offset} position={[.214, offset, 0]}><boxGeometry args={[.014, .018, width * .8]} /><GoldGlowMaterial intensity={.32} /></mesh>)}
-    <mesh position={[.2, 0, 0]}><boxGeometry args={[.018, height * .83, width * .84]} /><meshPhysicalMaterial color="#181a18" transparent opacity={.32} roughness={.13} metalness={.12} /></mesh>
-  </group>;
-}
-
-function JewelryDisplay() {
-  return <group position={[-3.54, .78, -1.55]}>
-    <DisplayCabinet position={[0, 0, 0]} width={1.65} height={1.1} shelves={2} />
-    {[-.48, 0, .48].map((offset) => <group key={offset} position={[.245, -.08, offset]}>
-      <mesh><torusGeometry args={[.14, .018, 8, 18]} rotation={[Math.PI / 2, 0, 0]} /><RoseGoldMaterial /></mesh>
-      <mesh position={[0, .29, 0]}><sphereGeometry args={[.04, 10, 8]} /><GoldGlowMaterial intensity={.25} /></mesh>
-    </group>)}
-    {[-.24, .24].map((offset) => <mesh key={offset} position={[.245, .35, offset]}><sphereGeometry args={[.045, 10, 8]} /><RoseGoldMaterial /></mesh>)}
-  </group>;
-}
-
-function LuxuryAccessoryDisplay() {
-  return <group position={[-3.54, .59, -5.85]}>
-    <DisplayCabinet position={[0, 0, 0]} width={1.28} height={.76} shelves={1} />
-    <mesh position={[.25, .18, 0]}><boxGeometry args={[.08, .2, .46]} /><meshStandardMaterial color="#211a18" roughness={.72} /></mesh>
-    <mesh position={[.305, .3, 0]}><torusGeometry args={[.12, .02, 8, 16, Math.PI]} rotation={[0, Math.PI / 2, 0]} /><RoseGoldMaterial /></mesh>
-  </group>;
-}
-
-function FashionDisplay() {
-  return <group position={[3.53, 1.12, -1.35]}>
-    <mesh position={[0, .38, 0]}><cylinderGeometry args={[.035, .035, 1.72, 14]} rotation={[Math.PI / 2, 0, 0]} /><RoseGoldMaterial /></mesh>
-    <mesh position={[0, -.1, -.82]}><cylinderGeometry args={[.028, .028, .98, 14]} /><RoseGoldMaterial /></mesh>
-    <mesh position={[0, -.1, .82]}><cylinderGeometry args={[.028, .028, .98, 14]} /><RoseGoldMaterial /></mesh>
-    {[-.48, -.16, .16, .48].map((offset, index) => <group key={offset} position={[0, .02, offset]}>
-      <mesh position={[.05, -.08, 0]}><boxGeometry args={[.15, .38, .17]} /><meshStandardMaterial color={index % 2 ? '#261b1c' : '#181719'} roughness={.86} /></mesh>
-      <mesh position={[.04, .14, 0]}><torusGeometry args={[.11, .014, 6, 16]} rotation={[0, Math.PI / 2, 0]} /><RoseGoldMaterial /></mesh>
-    </group>)}
-  </group>;
-}
-
-function VinylDisplay() {
-  return <group position={[3.53, .58, -5.85]}>
-    <DisplayCabinet position={[0, 0, 0]} width={1.35} height={.76} shelves={1} />
-    <mesh position={[.25, .2, 0]} rotation={[0, 0, Math.PI / 2]}><cylinderGeometry args={[.28, .28, .025, 32]} /><meshStandardMaterial color="#141313" metalness={.28} roughness={.4} /></mesh>
-    <mesh position={[.27, .2, 0]} rotation={[0, 0, Math.PI / 2]}><cylinderGeometry args={[.065, .065, .03, 20]} /><RoseGoldMaterial /></mesh>
-    <mesh position={[.31, .39, .15]} rotation={[0, 0, -.52]}><boxGeometry args={[.02, .26, .02]} /><RoseGoldMaterial /></mesh>
-    <mesh position={[.31, .5, .26]}><sphereGeometry args={[.035, 10, 8]} /><RoseGoldMaterial /></mesh>
-  </group>;
-}
-
 function ClawMarks({ side, y, z }) {
   const rotation = side < 0 ? Math.PI / 2 : -Math.PI / 2;
   return <group position={[side * 3.91, y, z]} rotation={[0, rotation, -.3]}>
@@ -156,12 +105,6 @@ function FeatureWallVines() {
   </>;
 }
 
-function MuseumLabel({ text, position, rotation }) {
-  return <group position={position} rotation={rotation}>
-    <CanvasWord text={text} width={.74} height={.19} font="600 44px Arial, sans-serif" color="#d1a56d" />
-  </group>;
-}
-
 export default function LaraRoomDecor() {
   return <>
     <FeatureWallBorder />
@@ -169,13 +112,9 @@ export default function LaraRoomDecor() {
     <NeonLaraSign />
     <FeatureWallVines />
 
-    <JewelryDisplay />
-    <LuxuryAccessoryDisplay />
-    <FashionDisplay />
-    <VinylDisplay />
-
-    <MuseumLabel text="LUXURY COLLECTION" position={[-3.84, 1.65, -1.55]} rotation={[0, Math.PI / 2, 0]} />
-    <MuseumLabel text="MUSIC ARCHIVE" position={[3.84, 1.44, -5.85]} rotation={[0, -Math.PI / 2, 0]} />
+    <LuxuryGlassDisplayCabinet position={[-3.56, .08, -1.9]} label="LUXURY COLLECTION" />
+    <LuxuryFashionDisplay position={[3.56, .08, -1.45]} rotation={[0, Math.PI, 0]} label="FASHION STUDY" />
+    <MusicExhibit position={[3.56, .08, -5.85]} rotation={[0, Math.PI, 0]} label="MUSIC ARCHIVE" />
 
     <ClawMarks side={-1} y={3.02} z={-7.65} />
     <ClawMarks side={1} y={3.22} z={-6.9} />
