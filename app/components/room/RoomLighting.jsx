@@ -21,19 +21,19 @@ function BaseGalleryLighting() {
 
 function LaraGalleryLighting() {
   return <>
-    <ambientLight color="#8b755b" intensity={.72} />
-    <hemisphereLight args={['#d6b98e', '#201a14', .72]} />
-    <pointLight position={[0, 4.26, 5.35]} color="#fff0d6" intensity={1.35} distance={10.7} decay={2} />
-    <pointLight position={[0, 4.2, -.2]} color="#e9d9c2" intensity={1.12} distance={10.4} decay={2} />
-    <pointLight position={[-3.1, 2.85, 3.3]} color="#f0dcc1" intensity={.82} distance={7.5} decay={2} />
-    <pointLight position={[3.1, 2.85, 3.3]} color="#f0dcc1" intensity={.82} distance={7.5} decay={2} />
-    <pointLight position={[-3.06, 2.65, -2.4]} color="#d6c1a5" intensity={.66} distance={6.9} decay={2} />
-    <pointLight position={[3.06, 2.65, -2.4]} color="#d6c1a5" intensity={.66} distance={6.9} decay={2} />
-    <pointLight position={[-2.98, 2.45, -6.75]} color="#cbb493" intensity={.6} distance={6.4} decay={2} />
-    <pointLight position={[2.98, 2.45, -6.75]} color="#cbb493" intensity={.6} distance={6.4} decay={2} />
-    <pointLight position={[0, 3.48, ROOM.backWallZ + 1.16]} color="#fff5e4" intensity={1.52} distance={8.2} decay={2} />
-    <pointLight position={[-2.38, 2.55, ROOM.backWallZ + 1.23]} color="#ddc8aa" intensity={.58} distance={5.6} decay={2} />
-    <pointLight position={[2.38, 2.55, ROOM.backWallZ + 1.23]} color="#ddc8aa" intensity={.58} distance={5.6} decay={2} />
+    <ambientLight color="#c9b69a" intensity={1.08} />
+    <hemisphereLight args={['#f3e3cb', '#4b4035', .95]} />
+    <pointLight position={[0, 4.26, 5.35]} color="#fff6e8" intensity={2} distance={13.5} decay={2} />
+    <pointLight position={[0, 4.2, -.2]} color="#f1eee7" intensity={1.75} distance={13} decay={2} />
+    <pointLight position={[-3.1, 2.85, 3.3]} color="#f6ecdf" intensity={1.15} distance={9.2} decay={2} />
+    <pointLight position={[3.1, 2.85, 3.3]} color="#f6ecdf" intensity={1.15} distance={9.2} decay={2} />
+    <pointLight position={[-3.06, 2.65, -2.4]} color="#e0d9cf" intensity={.9} distance={8.5} decay={2} />
+    <pointLight position={[3.06, 2.65, -2.4]} color="#e0d9cf" intensity={.9} distance={8.5} decay={2} />
+    <pointLight position={[-2.98, 2.45, -6.75]} color="#ded2c0" intensity={.78} distance={7.9} decay={2} />
+    <pointLight position={[2.98, 2.45, -6.75]} color="#ded2c0" intensity={.78} distance={7.9} decay={2} />
+    <pointLight position={[0, 3.48, ROOM.backWallZ + 1.16]} color="#fff9ee" intensity={2.15} distance={10} decay={2} />
+    <pointLight position={[-2.38, 2.55, ROOM.backWallZ + 1.23]} color="#e9dfd1" intensity={.78} distance={7.2} decay={2} />
+    <pointLight position={[2.38, 2.55, ROOM.backWallZ + 1.23]} color="#e9dfd1" intensity={.78} distance={7.2} decay={2} />
   </>;
 }
 

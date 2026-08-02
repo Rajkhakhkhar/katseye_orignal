@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import * as THREE from 'three';
-import laraCheetahBaseColor from '../../assets/room/lara/lara-cheetah-carpet-basecolor-v2.png';
+import laraCheetahBaseColor from '../../assets/room/lara/lara-cheetah-carpet-reference.jpg';
 
 const MAP_SIZE = 384;
 
@@ -14,9 +14,9 @@ const surfaceProfiles = {
 // keeps the same carpet family wrapping the room without reading as one flat
 // repeated wallpaper tile.
 const laraProfiles = {
-  floor: { repeat: [1.48, 3.18], offset: [.13, .19], rotation: -.024, color: '#715944', roughness: .91, bumpScale: .021, detail: .78 },
-  ceiling: { repeat: [1.36, 3.05], offset: [.47, .11], rotation: .018, color: '#685440', roughness: .98, bumpScale: .014, detail: .46 },
-  wall: { repeat: [2.42, .92], offset: [.31, .26], rotation: -.012, color: '#947653', roughness: .94, bumpScale: .024, detail: .63 },
+  floor: { repeat: [.94, 2.04], offset: [.13, .19], rotation: -.018, color: '#b49471', roughness: .97, bumpScale: .014, detail: .5 },
+  ceiling: { repeat: [1.02, 2.16], offset: [.47, .11], rotation: .014, color: '#b99d7c', roughness: .985, bumpScale: .008, detail: .28 },
+  wall: { repeat: [1.48, .64], offset: [.31, .26], rotation: -.009, color: '#efd4aa', roughness: .965, bumpScale: .016, detail: .42 },
 };
 
 function configureTexture(texture, repeat, colorSpace = THREE.NoColorSpace, transform = {}) {
@@ -26,7 +26,7 @@ function configureTexture(texture, repeat, colorSpace = THREE.NoColorSpace, tran
   texture.offset.set(...(transform.offset || [0, 0]));
   texture.center.set(.5, .5);
   texture.rotation = transform.rotation || 0;
-  texture.anisotropy = 8;
+  texture.anisotropy = transform.anisotropy ?? 8;
   texture.minFilter = THREE.LinearMipmapLinearFilter;
   texture.magFilter = THREE.LinearFilter;
   texture.colorSpace = colorSpace;
@@ -122,15 +122,21 @@ function createFabricDetailMaps(source, profile) {
     for (let x = 0; x < size; x += 1) {
       const index = y * size + x;
       const pixel = index * 4;
-      const left = luminance[y * size + ((x - 1 + size) % size)];
-      const right = luminance[y * size + ((x + 1) % size)];
-      const up = luminance[((y - 1 + size) % size) * size + x];
-      const down = luminance[((y + 1) % size) * size + x];
-      const neighborhood = (left + right + up + down) * .25;
-      const highFrequency = (luminance[index] - neighborhood) * profile.detail;
-      const fiber = Math.sin((x * 1.73 + y * .41) * .16) * 2.8 + Math.sin((x * .37 - y * 1.91) * .22) * 1.7;
-      const height = clampByte(128 + highFrequency * 2.65 + fiber);
-      const fabricRoughness = clampByte(232 - Math.abs(highFrequency) * .22 + fiber * .45);
+      let neighborhood = 0;
+
+      for (let offsetY = -2; offsetY <= 2; offsetY += 1) {
+        for (let offsetX = -2; offsetX <= 2; offsetX += 1) {
+          const sampleX = (x + offsetX + size) % size;
+          const sampleY = (y + offsetY + size) % size;
+          neighborhood += luminance[sampleY * size + sampleX];
+        }
+      }
+
+      const highFrequency = (luminance[index] - neighborhood / 25) * profile.detail;
+      const pileDirection = Math.sin((x * 1.57 + y * .36) * .15) * 1.15
+        + Math.sin((x * .29 - y * 1.74) * .2) * .7;
+      const height = clampByte(128 + highFrequency * 1.05 + pileDirection);
+      const fabricRoughness = clampByte(247 - Math.abs(highFrequency) * .045 + pileDirection * .15);
 
       bumpPixels.data[pixel] = height;
       bumpPixels.data[pixel + 1] = height;
@@ -151,7 +157,7 @@ function createFabricDetailMaps(source, profile) {
   roughnessCanvas.width = size;
   roughnessCanvas.height = size;
   roughnessCanvas.getContext('2d').putImageData(roughnessPixels, 0, 0);
-  const transform = { mirrored: true, offset: profile.offset, rotation: profile.rotation };
+  const transform = { mirrored: true, anisotropy: 4, offset: profile.offset, rotation: profile.rotation };
 
   return {
     bump: configureTexture(new THREE.CanvasTexture(bumpCanvas), profile.repeat, THREE.NoColorSpace, transform),
@@ -161,10 +167,10 @@ function createFabricDetailMaps(source, profile) {
 
 function createLaraSurface(source, kind) {
   const profile = laraProfiles[kind];
-  const transform = { mirrored: true, offset: profile.offset, rotation: profile.rotation };
+  const transform = { mirrored: true, anisotropy: 4, offset: profile.offset, rotation: profile.rotation };
   const color = configureTexture(source.clone(), profile.repeat, THREE.SRGBColorSpace, transform);
-  const { bump, roughness } = createFabricDetailMaps(source, profile);
-  return { color, bump, roughness, material: profile };
+  const fabricMaps = createFabricDetailMaps(source, profile);
+  return { color, ...fabricMaps, material: profile };
 }
 
 function useLaraTexture(enabled) {
@@ -217,7 +223,7 @@ export function useRoomSurfaceMaps(surfacePreset = 'base-neutral') {
 // This generated base-color provides the current carpet pass. Production PBR
 // maps can be added later without changing the room or its material contract.
 export const LARA_TEXTURE_SLOTS = Object.freeze({
-  activeBaseColor: 'app/assets/room/lara/lara-cheetah-carpet-basecolor-v2.png',
+  activeBaseColor: 'app/assets/room/lara/lara-cheetah-carpet-reference.jpg',
   baseColor: 'app/assets/room/lara/lara-cheetah-basecolor.webp',
   normal: 'app/assets/room/lara/lara-cheetah-normal.webp',
   roughness: 'app/assets/room/lara/lara-cheetah-roughness.webp',
