@@ -14,9 +14,12 @@ const surfaceProfiles = {
 // keeps the same carpet family wrapping the room without reading as one flat
 // repeated wallpaper tile.
 const laraProfiles = {
-  floor: { repeat: [.94, 2.04], offset: [.13, .19], rotation: -.018, color: '#b49471', roughness: .97, bumpScale: .014, detail: .5 },
-  ceiling: { repeat: [1.02, 2.16], offset: [.47, .11], rotation: .014, color: '#b99d7c', roughness: .985, bumpScale: .008, detail: .28 },
+  // One source material, adjusted per physical plane so it reads as continuous
+  // upholstered short-pile carpet instead of a repeated wallpaper tile.
+  floor: { repeat: [.94, 2.04], offset: [.13, .19], rotation: -.018, color: '#765845', roughness: .985, bumpScale: .024, detail: .56 },
+  ceiling: { repeat: [.94, 2.04], offset: [.41, .27], rotation: .012, color: '#66503c', roughness: .99, bumpScale: .016, detail: .34 },
   wall: { repeat: [1.48, .64], offset: [.31, .26], rotation: -.009, color: '#efd4aa', roughness: .965, bumpScale: .016, detail: .42 },
+  backWall: { repeat: [.82, .9], offset: [.2, .12], rotation: 0, color: '#72543c', roughness: .985, bumpScale: .018, detail: .4 },
 };
 
 function configureTexture(texture, repeat, colorSpace = THREE.NoColorSpace, transform = {}) {
@@ -173,6 +176,13 @@ function createLaraSurface(source, kind) {
   return { color, ...fabricMaps, material: profile };
 }
 
+function createGraphiteArchitecturalSurface(kind, material) {
+  return {
+    ...createRoomSurface(kind),
+    material,
+  };
+}
+
 function useLaraTexture(enabled) {
   const [texture, setTexture] = useState(null);
 
@@ -209,7 +219,7 @@ export function useRoomSurfaceMaps(surfacePreset = 'base-neutral') {
     floor: createLaraSurface(laraSource, 'floor'),
     ceiling: createLaraSurface(laraSource, 'ceiling'),
     sideWall: createLaraSurface(laraSource, 'wall'),
-    backWall: createLaraSurface(laraSource, 'wall'),
+    backWall: createLaraSurface(laraSource, 'backWall'),
   } : null), [laraSource]);
 
   useEffect(() => () => disposeSurfaceMaps(neutralMaps), [neutralMaps]);

@@ -1,7 +1,8 @@
+import { useMemo } from 'react';
 import * as THREE from 'three';
 import { useRoomSurfaceMaps } from './RoomMaterials';
 import { AdaptiveFrameGallery } from './RoomFrames';
-import { ROOM } from './roomConfig';
+import { LARA_NICHE_LAYOUT, ROOM } from './roomConfig';
 
 function RoseGoldTrimMaterial() {
   return <meshPhysicalMaterial color="#9aa2aa" metalness={.76} roughness={.36} clearcoat={.16} clearcoatRoughness={.3} />;
@@ -37,32 +38,46 @@ function SurfaceMaterial({ surface, fallbackColor, roughness, bumpScale, doubleS
   />;
 }
 
-function SideWallPanel({ side, z, textureSurface, isTextile }) {
-  const x = side * (ROOM.width / 2 - .015);
-  const trimX = side * (ROOM.width / 2 - .055);
-  return <group>
-    <mesh position={[x, 2.52, z]}>
-      <boxGeometry args={[.03, 3.82, 3.75]} />
-      {isTextile ? <SurfaceMaterial surface={textureSurface} fallbackColor="#4e5862" roughness={.82} bumpScale={.027} /> : <meshStandardMaterial color="#4e5862" metalness={.08} roughness={.82} />}
-    </mesh>
-    <mesh position={[trimX, 2.52, z - 1.84]}><boxGeometry args={[.045, 3.9, .055]} /><ArchitecturalMetal /></mesh>
-    <mesh position={[trimX, 2.52, z + 1.84]}><boxGeometry args={[.045, 3.9, .055]} /><ArchitecturalMetal /></mesh>
-    <mesh position={[trimX, .61, z]}><boxGeometry args={[.045, .055, 3.74]} /><ArchitecturalMetal /></mesh>
-    <mesh position={[trimX, 4.43, z]}><boxGeometry args={[.045, .055, 3.74]} /><ArchitecturalMetal /></mesh>
-  </group>;
-}
+function RecessedSideWall({ side, textureSurface, isTextile }) {
+  const geometry = useMemo(() => {
+    const zMin = ROOM.backWallZ + .18;
+    const zMax = ROOM.entranceZ - .18;
+    const shape = new THREE.Shape();
+    // Local x maps to world z after the Y rotation below.
+    shape.moveTo(-zMax, 0);
+    shape.lineTo(-zMin, 0);
+    shape.lineTo(-zMin, ROOM.height);
+    shape.lineTo(-zMax, ROOM.height);
+    shape.lineTo(-zMax, 0);
 
+    LARA_NICHE_LAYOUT[side < 0 ? 'left' : 'right'].forEach(({ y, z, width, height }) => {
+      const x0 = -(z + width / 2);
+      const x1 = -(z - width / 2);
+      const y0 = y - height / 2;
+      const y1 = y + height / 2;
+      const opening = new THREE.Path();
+      // Opposite winding makes this an actual rectangular hole in the wall mesh.
+      opening.moveTo(x0, y0);
+      opening.lineTo(x0, y1);
+      opening.lineTo(x1, y1);
+      opening.lineTo(x1, y0);
+      opening.lineTo(x0, y0);
+      shape.holes.push(opening);
+    });
+
+    return new THREE.ShapeGeometry(shape);
+  }, [side]);
+
+  return <mesh position={[side * ROOM.width / 2, 0, 0]} rotation={[0, Math.PI / 2, 0]} geometry={geometry} receiveShadow>
+    <SurfaceMaterial surface={textureSurface} fallbackColor="#87919a" roughness={.8} bumpScale={.07} doubleSided />
+  </mesh>;
+}
 function LuxuryArchitecturalShell({ roomCenterZ, surfaces, isTextile }) {
-  const panelCenters = [ROOM.entranceZ - 3.3, ROOM.entranceZ - 8.05, ROOM.entranceZ - 12.8];
   return <>
     <mesh position={[-ROOM.width / 2 + .065, .19, roomCenterZ]}><boxGeometry args={[.12, .22, ROOM.length]} /><ArchitecturalMetal color="#7e8892" /></mesh>
     <mesh position={[ROOM.width / 2 - .065, .19, roomCenterZ]}><boxGeometry args={[.12, .22, ROOM.length]} /><ArchitecturalMetal color="#7e8892" /></mesh>
     <mesh position={[0, .19, ROOM.backWallZ + .045]}><boxGeometry args={[ROOM.width, .22, .12]} /><ArchitecturalMetal color="#7e8892" /></mesh>
 
-    {panelCenters.map((z) => <group key={z}>
-      <SideWallPanel side={-1} z={z} textureSurface={surfaces.sideWall} isTextile={isTextile} />
-      <SideWallPanel side={1} z={z} textureSurface={surfaces.sideWall} isTextile={isTextile} />
-    </group>)}
 
     <mesh position={[0, 2.55, ROOM.backWallZ + .02]}>
       <boxGeometry args={[5.9, 3.75, .035]} />
@@ -121,14 +136,8 @@ export default function RoomArchitecture({ theme }) {
       <planeGeometry args={[ROOM.width, ROOM.length]} />
       <SurfaceMaterial surface={surfaces.ceiling} fallbackColor="#aeb5bb" roughness={.88} bumpScale={.05} doubleSided />
     </mesh>
-    <mesh position={[-ROOM.width / 2, ROOM.height / 2, roomCenterZ]} rotation={[0, Math.PI / 2, 0]}>
-      <planeGeometry args={[ROOM.length, ROOM.height]} />
-      <SurfaceMaterial surface={surfaces.sideWall} fallbackColor="#87919a" roughness={.8} bumpScale={.07} doubleSided />
-    </mesh>
-    <mesh position={[ROOM.width / 2, ROOM.height / 2, roomCenterZ]} rotation={[0, -Math.PI / 2, 0]}>
-      <planeGeometry args={[ROOM.length, ROOM.height]} />
-      <SurfaceMaterial surface={surfaces.sideWall} fallbackColor="#87919a" roughness={.8} bumpScale={.07} doubleSided />
-    </mesh>
+    <RecessedSideWall side={-1} textureSurface={surfaces.sideWall} isTextile={isTextile} />
+    <RecessedSideWall side={1} textureSurface={surfaces.sideWall} isTextile={isTextile} />
     <mesh position={[0, ROOM.height / 2, ROOM.backWallZ]}>
       <planeGeometry args={[ROOM.width, ROOM.height]} />
       <SurfaceMaterial surface={surfaces.backWall} fallbackColor="#78828c" roughness={.81} bumpScale={.07} doubleSided />

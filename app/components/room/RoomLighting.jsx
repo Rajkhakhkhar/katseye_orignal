@@ -19,68 +19,54 @@ function BaseGalleryLighting() {
   </>;
 }
 
-function HiddenPerimeterLeds() {
-  const runs = [6.6, 2.1, -2.4, -6.9];
+const AMBER = '#d29a57';
+const CHAMPAGNE = '#e6c48b';
+const ROSE_GOLD = '#b78966';
+
+function PerimeterLighting() {
+  const runs = [-6.5, -2.25, 2.05, 6.35];
   return <>
-    {[-1, 1].flatMap((side) => runs.map((z) => (
-      <pointLight
-        key={`${side}-${z}`}
-        position={[side * 3.5, 4.66, z]}
-        color="#e7ad64"
-        intensity={.34}
-        distance={4.3}
-        decay={2}
-      />
-    )))}
-    {[-2.35, 0, 2.35].map((x) => (
-      <pointLight key={x} position={[x, 4.64, ROOM.backWallZ + .5]} color="#e7ad64" intensity={.28} distance={3.6} decay={2} />
-    ))}
+    {[-1, 1].flatMap((side) => runs.map((z) => <pointLight key={`${side}-${z}`} position={[side * 3.57, 4.68, z]} color={AMBER} intensity={.52} distance={4.9} decay={2} />))}
+    <pointLight position={[0, 4.66, 8.52]} color={AMBER} intensity={.48} distance={5.1} decay={2} />
+    <pointLight position={[0, 4.66, ROOM.backWallZ + .5]} color={AMBER} intensity={.56} distance={5.2} decay={2} />
+    {[-1, 1].flatMap((side) => [-5, 0, 5].map((z) => <pointLight key={`kick-${side}-${z}`} position={[side * 3.54, .18, z]} color="#c5843f" intensity={.19} distance={3.15} decay={2} />))}
   </>;
 }
 
-function SoftWallWashes() {
-  const zones = [4.4, -.55, -5.25];
+function WallWashLighting() {
+  const zones = [5.2, .45, -4.4];
   return <>
-    {[-1, 1].flatMap((side) => zones.map((z) => (
-      <pointLight
-        key={`${side}-${z}`}
-        position={[side * 3.18, 2.75, z]}
-        color="#dcb47d"
-        intensity={.42}
-        distance={5.5}
-        decay={2}
-      />
-    )))}
+    {[-1, 1].flatMap((side) => zones.map((z) => <pointLight key={`wash-${side}-${z}`} position={[side * 3.48, 2.85, z]} color={CHAMPAGNE} intensity={.56} distance={5.25} decay={2} />))}
   </>;
 }
 
-function DisplayAccents() {
+function NicheAccentLighting() {
+  const left = [[3.1, 5.45, .3], [3.55, 1.65, .2], [2.35, -1.45, .24]];
+  const right = [[3.08, 5.35, .3], [2.8, 1.95, .22], [2.85, -1.35, .24]];
   return <>
-    <pointLight position={[-3.14, 2.08, -1.9]} color="#e5ad65" intensity={.42} distance={3.25} decay={2} />
-    <pointLight position={[3.14, 2.05, -1.45]} color="#e5ad65" intensity={.36} distance={3.2} decay={2} />
-    <pointLight position={[3.12, 1.36, -5.85]} color="#dba461" intensity={.32} distance={2.9} decay={2} />
+    {left.map(([y, z, intensity]) => <pointLight key={`left-niche-${z}`} position={[-3.62, y, z]} color={ROSE_GOLD} intensity={intensity} distance={1.95} decay={2} />)}
+    {right.map(([y, z, intensity]) => <pointLight key={`right-niche-${z}`} position={[3.62, y, z]} color={ROSE_GOLD} intensity={intensity} distance={1.95} decay={2} />)}
+  </>;
+}
+
+function StageLighting() {
+  const corners = [[-2.14, 3.66], [2.14, 3.66], [-2.14, 1.04], [2.14, 1.04]];
+  return <>
+    {corners.map(([x, y]) => <pointLight key={`${x}-${y}`} position={[x, y, ROOM.backWallZ + .73]} color={CHAMPAGNE} intensity={.42} distance={4.15} decay={2} />)}
+    <pointLight position={[0, 2.64, ROOM.backWallZ + 1.1]} color="#efbf79" intensity={.62} distance={5.1} decay={2} />
+    <pointLight position={[0, .62, ROOM.backWallZ + 1.1]} color={AMBER} intensity={.5} distance={4.85} decay={2} />
+    <pointLight position={[0, 1.62, ROOM.backWallZ + .95]} color={ROSE_GOLD} intensity={.3} distance={2.8} decay={2} />
   </>;
 }
 
 function LaraGalleryLighting() {
   return <>
-    {/* A quiet champagne fill preserves material detail without flattening the room. */}
-    <ambientLight color="#d9c39d" intensity={.7} />
-    <hemisphereLight args={['#f0d9b5', '#261b15', .64]} />
-
-    {/* Hidden ceiling-edge fixtures: their source is never rendered, only their amber spill. */}
-    <HiddenPerimeterLeds />
-
-    {/* Low-intensity panel washes keep the gallery walls legible while retaining shadowed corners. */}
-    <SoftWallWashes />
-
-    {/* Two restrained layers make the stage the natural destination rather than a hard spotlight. */}
-    <pointLight position={[0, 3.9, ROOM.backWallZ + 1.75]} color="#f1c27f" intensity={1.42} distance={8.6} decay={2} />
-    <pointLight position={[0, 1.35, ROOM.backWallZ + 1.18]} color="#dba460" intensity={.58} distance={5.8} decay={2} />
-    <pointLight position={[-2.16, 2.56, ROOM.backWallZ + 1.48]} color="#dcb278" intensity={.46} distance={5.3} decay={2} />
-    <pointLight position={[2.16, 2.56, ROOM.backWallZ + 1.48]} color="#dcb278" intensity={.46} distance={5.3} decay={2} />
-
-    <DisplayAccents />
+    <ambientLight color="#756553" intensity={.54} />
+    <hemisphereLight args={['#cdbb9f', '#151416', .68]} />
+    <PerimeterLighting />
+    <WallWashLighting />
+    <NicheAccentLighting />
+    <StageLighting />
   </>;
 }
 
