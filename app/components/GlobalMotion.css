@@ -1,0 +1,25 @@
+:root { --global-drift-x: 0px; --global-drift-y: 0px; }
+
+.global-motion { position: fixed; z-index: 15; inset: 0; overflow: hidden; pointer-events: none; mix-blend-mode: screen; }
+.global-motion-breath { position: absolute; inset: -20%; opacity: .2; background: radial-gradient(ellipse at 18% 24%, rgba(226, 255, 248, .09), transparent 39%), radial-gradient(ellipse at 82% 68%, rgba(198, 240, 255, .065), transparent 42%); transform: translate3d(0, 0, 0) scale(1); animation: global-breath 42s cubic-bezier(.45, 0, .55, 1) infinite alternate; will-change: transform, opacity; }
+.global-cursor-glow { position: absolute; top: 0; left: 0; width: min(44vw, 42rem); aspect-ratio: 1; border-radius: 50%; opacity: 0; background: radial-gradient(circle, rgba(225, 255, 249, .09), rgba(166, 234, 228, .035) 32%, transparent 69%); filter: blur(17px); transition: opacity 700ms cubic-bezier(.16, .84, .22, 1); will-change: transform, opacity; }
+.global-cursor-glow.is-active { opacity: 1; }
+.global-particle-field { position: absolute; inset: 0; }
+.global-particle-field i { position: absolute; left: var(--particle-x); top: var(--particle-y); width: var(--particle-size); height: var(--particle-size); border-radius: 50%; opacity: var(--particle-opacity); background: #efffff; box-shadow: 0 0 8px rgba(218, 255, 250, .34); transform: translate3d(0, 0, 0); animation: global-dust var(--particle-duration) cubic-bezier(.45, 0, .55, 1) var(--particle-delay) infinite alternate; will-change: transform, opacity; }
+
+/* Decorative layers only: content itself never travels. */
+.grain { transform: translate3d(calc(var(--global-drift-x) * -.08), calc(var(--global-drift-y) * -.08), 0); will-change: transform; }
+.boss-noise { transform: translate3d(calc(var(--global-drift-x) * .16), calc(var(--global-drift-y) * .16), 0); will-change: transform; }
+.journey-v3::after { transform: translate3d(calc(var(--global-drift-x) * -.3), calc(var(--global-drift-y) * -.28), 0); will-change: transform; }
+.present-day::after { transform: translate3d(calc(var(--global-drift-x) * .24), calc(var(--global-drift-y) * .22), 0); will-change: transform; }
+.lightstick-liquid { transform: translate3d(calc(var(--global-drift-x) * .12), calc(var(--global-drift-y) * .12), 0); will-change: transform; }
+.universe-hub-stage::before { transform: translate3d(calc(var(--global-drift-x) * -.16), calc(var(--global-drift-y) * -.16), 0); will-change: transform; }
+
+@keyframes global-breath { from { transform: translate3d(-1.2%, -.8%, 0) scale(.99); opacity: .13; } to { transform: translate3d(1.2%, .9%, 0) scale(1.04); opacity: .26; } }
+@keyframes global-dust { from { transform: translate3d(0, 0, 0) scale(.8); opacity: calc(var(--particle-opacity) * .58); } to { transform: translate3d(var(--particle-drift-x), var(--particle-drift-y), 0) scale(1.18); opacity: var(--particle-opacity); } }
+
+html.global-motion-paused .global-motion-breath,
+html.global-motion-paused .global-particle-field i { animation-play-state: paused; }
+
+@media (pointer: coarse), (hover: none) { .global-cursor-glow { display: none; } }
+@media (prefers-reduced-motion: reduce) { .global-motion { display: none; } .grain, .boss-noise, .journey-v3::after, .present-day::after, .lightstick-liquid, .universe-hub-stage::before { transform: none; } }

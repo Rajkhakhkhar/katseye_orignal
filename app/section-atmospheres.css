@@ -1,0 +1,174 @@
+/* Shared chapter atmosphere: all foreground layout and media rules stay in
+   their existing section styles. These layers live behind the content only. */
+.journey-v3 {
+  background:
+    radial-gradient(90% 72% at calc(13% + (var(--journey-progress) * 8%)) 8%, rgba(61, 128, 106, .24), transparent 67%),
+    radial-gradient(66% 52% at 88% calc(24% + (var(--journey-progress) * 7%)), rgba(111, 213, 212, .085), transparent 70%),
+    radial-gradient(72% 58% at 48% 92%, rgba(183, 227, 109, .07), transparent 72%),
+    linear-gradient(148deg, #0a1a20 0%, #12332f 48%, #08151d 100%);
+  color: #e8f3ed;
+}
+
+.journey-v3::before {
+  opacity: .28;
+  background-image:
+    radial-gradient(circle at 18% 26%, rgba(196, 255, 245, .34) 0 .55px, transparent .8px),
+    radial-gradient(circle at 73% 62%, rgba(183, 227, 109, .18) 0 .45px, transparent .72px),
+    radial-gradient(rgba(207, 244, 238, .12) .42px, transparent .72px);
+  background-size: 173px 151px, 239px 211px, 7px 7px;
+}
+
+.journey-v3::after {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  pointer-events: none;
+  opacity: .46;
+  background:
+    repeating-radial-gradient(ellipse 110% 48% at 51% 29%, transparent 0 21.5%, rgba(111, 213, 212, .085) 21.58% 21.66%, transparent 21.76% 34%),
+    repeating-linear-gradient(122deg, transparent 0 15vw, rgba(150, 224, 211, .075) 15.05vw 15.1vw, transparent 15.16vw 29vw);
+  background-position: center calc(var(--journey-progress) * -22px), center;
+  mask-image: linear-gradient(to bottom, transparent, black 8%, black 92%, transparent);
+}
+
+/* Frosted cards are intentionally restrained so the archive feels connected
+   to the new environment without changing the timeline's composition. */
+.journey-v3-card {
+  color: #e8f4ef;
+  border-color: rgba(151, 223, 211, .26);
+  background: rgba(18, 52, 54, .54);
+  box-shadow: 0 18px 42px rgba(2, 12, 17, .22), inset 0 1px 0 rgba(224, 255, 248, .09);
+  backdrop-filter: blur(16px) saturate(112%);
+  -webkit-backdrop-filter: blur(16px) saturate(112%);
+}
+
+.journey-v3-card.is-visible:hover {
+  box-shadow: 0 22px 50px rgba(2, 12, 17, .3), inset 0 1px 0 rgba(224, 255, 248, .12);
+}
+
+.journey-v3-image,
+.journey-v3-image > img,
+.journey-v3-placeholder {
+  background: rgba(15, 48, 51, .62) !important;
+}
+
+.journey-v3-image > img {
+  object-fit: contain !important;
+  object-position: center !important;
+}
+
+.journey-v3-copy { min-width: 0; }
+.journey-v3-copy h4 {
+  min-width: 0;
+  font-size: clamp(1.72rem, 3.5vw, 3.35rem);
+  line-height: .9;
+  overflow-wrap: normal;
+  word-break: normal;
+  text-wrap: balance;
+}
+.journey-v3-copy > div { color: rgba(222, 242, 236, .72); }
+.journey-v3-copy > p { color: #a6d8c4; }
+.journey-v3-placeholder { color: #dff5ee; border-color: rgba(151, 223, 211, .22); }
+.journey-v3-placeholder span { color: rgba(191, 229, 218, .66); }
+.journey-v3-members { color: #a9e2c1; }
+.journey-v3-members strong { color: #c9f0b2; }
+.journey-v3-year span { background: rgba(17, 52, 54, .82); border-color: rgba(174, 230, 217, .3); }
+.journey-v3-node {
+  position: relative;
+  width: 13px;
+  height: 13px;
+  border: 1px solid rgba(183, 227, 109, .78);
+  background: radial-gradient(circle, #d1ffff 0 18%, #6fd5d4 22% 43%, rgba(111, 213, 212, .18) 46% 100%);
+  box-shadow: 0 0 0 4px rgba(111, 213, 212, .07), 0 0 18px rgba(111, 213, 212, .36);
+  animation: journey-waypoint 3.8s ease-in-out infinite;
+}
+.journey-v3-node::after { content: ''; position: absolute; inset: 3px; border-radius: 50%; background: #e7ffff; box-shadow: 0 0 9px rgba(216, 255, 255, .88); }
+.journey-v3-path-base {
+  stroke: rgba(126, 219, 205, .2);
+  stroke-dasharray: .006 .09;
+  animation: journey-connector-signal 8s linear infinite;
+}
+.journey-v3-path-progress { stroke: #82d8cf; filter: drop-shadow(0 0 4px rgba(111, 213, 212, .3)); }
+.journey-v3-intro h2,
+.journey-v3-intro h3,
+.journey-v3-ending { color: #e8f3ed; }
+.journey-v3-intro span,
+.journey-v3-ending p { color: rgba(216, 239, 232, .68); }
+.journey-v3-intro p { color: #9ed3bd; }
+
+.present-day {
+  position: relative;
+  isolation: isolate;
+  background:
+    radial-gradient(78% 64% at calc(81% + (var(--present-parallax) * .18)) 12%, rgba(111, 213, 212, .14), transparent 72%),
+    radial-gradient(64% 50% at 9% 63%, rgba(16, 57, 75, .62), transparent 75%),
+    radial-gradient(55% 44% at 58% 92%, rgba(77, 176, 182, .055), transparent 74%),
+    linear-gradient(150deg, #06111d 0%, #0a1a2a 49%, #071522 100%);
+  color: #e8f4f1;
+}
+
+.present-day::before,
+.present-day::after {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  pointer-events: none;
+}
+
+.present-day::before {
+  opacity: .3;
+  background-image:
+    radial-gradient(circle at 16% 22%, rgba(177, 246, 240, .34) 0 .55px, transparent .82px),
+    radial-gradient(circle at 72% 72%, rgba(183, 227, 109, .16) 0 .48px, transparent .75px),
+    radial-gradient(rgba(174, 239, 235, .105) .4px, transparent .7px);
+  background-size: 179px 161px, 251px 223px, 8px 8px;
+}
+
+.present-day::after {
+  opacity: .38;
+  background:
+    repeating-radial-gradient(ellipse 118% 52% at 50% 31%, transparent 0 21%, rgba(111, 213, 212, .095) 21.08% 21.16%, transparent 21.25% 33%),
+    repeating-linear-gradient(121deg, transparent 0 17vw, rgba(163, 232, 231, .078) 17.05vw 17.1vw, transparent 17.16vw 31vw);
+  background-position: center calc(var(--present-parallax) * -.28), center;
+  mask-image: linear-gradient(to bottom, transparent, black 7%, black 94%, transparent);
+}
+
+.present-day > * { position: relative; z-index: 1; }
+.present-collaborations { background: transparent; }
+
+/* Text colors are adjusted only where a section-level inherited ink color
+   would otherwise become unreadable against the new dark backgrounds. */
+.present-day-intro h2,
+.present-wild-copy h3,
+.present-film-copy h3,
+.present-collaborations h3,
+.present-campaigns h3,
+.present-day-ending { color: #ecf7f3; }
+.present-day-intro > span,
+.present-wild-copy > span,
+.present-film-copy > span,
+.present-film-copy div,
+.present-day-ending p { color: rgba(214, 237, 232, .68); }
+.present-day-intro p,
+.present-wild-copy p,
+.present-film-copy p,
+.present-collaborations p,
+.present-campaigns header p { color: #9fd7c4; }
+.present-track-list li { color: rgba(234, 247, 244, .9); border-bottom-color: rgba(183, 229, 219, .18); }
+.present-track-list i { color: #9ed4bd; }
+
+@keyframes journey-waypoint {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 4px rgba(111, 213, 212, .07), 0 0 18px rgba(111, 213, 212, .3); }
+  50% { transform: scale(1.14); box-shadow: 0 0 0 7px rgba(183, 227, 109, .075), 0 0 24px rgba(111, 213, 212, .45); }
+}
+
+@keyframes journey-connector-signal { to { stroke-dashoffset: -.28; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .journey-v3::after,
+  .present-day::after { background-position: center; }
+  .journey-v3-node,
+  .journey-v3-path-base { animation: none; }
+}

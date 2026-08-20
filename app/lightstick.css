@@ -284,12 +284,10 @@
 /* Real structural Sections 3, 4 and 5 — visually seamless, but each owns one viewport of the fall. */
 .lightstick-transition {
   position: relative;
-  height: auto;
-  min-height: 300vh;
-  /* Makes the complete third section reachable when this is the final story
-     sequence on the page, plus a short resting hold after impact. */
-  padding-bottom: 650vh;
-  overflow: visible;
+  height: var(--lightstick-scroll-height, 855vh);
+  min-height: var(--lightstick-scroll-height, 855vh);
+  padding-bottom: 0;
+  overflow: clip;
   isolation: isolate;
   background: #b6e5ee;
 }
@@ -396,6 +394,8 @@
   pointer-events: none;
   background: linear-gradient(transparent, rgba(4, 9, 27, .78));
 }
+.impact-card-back img { object-fit: contain; object-position: center; background: #151322; }
+.impact-card-back::after { display: none; }
 .charm-card-copy {
   position: absolute;
   z-index: 2;
@@ -479,6 +479,9 @@
 
 /* The future-universe entrance is deliberately a separate, immersive world. */
 .universe-hub { position:relative; min-height:175vh; overflow:clip; background:#080914; }
+.universe-hub.door-handoff-pending { visibility:hidden; }
+.universe-hub.door-handoff-pending.is-door-ready { visibility:visible; }
+@media (prefers-reduced-motion: reduce) { .universe-hub.door-handoff-pending { visibility:visible; } }
 .universe-hub-stage {
   position:sticky; top:0; height:100vh; overflow:hidden; isolation:isolate;
   background:radial-gradient(circle at 50% 37%, rgba(71,79,139,.18), transparent 36%), #080914;

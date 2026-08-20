@@ -1,0 +1,15 @@
+/* Image and copy containment only — the alternating journey composition stays intact. */
+#journey .journey-v3-card{grid-template-columns:minmax(0,48%) minmax(0,52%);min-height:clamp(320px,29vw,390px);align-items:stretch}
+#journey .journey-v3-image{min-width:0;min-height:0;height:100%;aspect-ratio:auto;display:grid;place-items:center}
+#journey .journey-v3-image>img{width:100%;height:100%;object-fit:contain!important;object-position:var(--journey-image-position,center)!important;transform:none!important}
+/* This source was supplied sideways at the pixel level, not through EXIF. */
+#journey .journey-v3-image.is-rotated-media>img{transform:rotate(-90deg)!important}
+#journey .journey-v3-copy{min-width:0;display:grid;align-content:center;gap:0;padding:clamp(25px,3.6vw,46px)}
+#journey .journey-v3-copy h4{min-width:0;min-height:0;margin:0 0 14px;font-size:clamp(1.48rem,2.85vw,3.2rem);line-height:.94;letter-spacing:-.055em;overflow-wrap:normal;word-break:normal;text-wrap:balance}
+#journey .journey-v3-copy>p{margin:0 0 14px}
+#journey .journey-v3-copy>div{min-height:0;line-height:1.5;overflow-wrap:normal;word-break:normal}
+#journey .journey-v3-path-base{stroke:rgba(127,224,210,.17);stroke-width:.26;stroke-dasharray:none;animation:none}
+#journey .journey-v3-path-progress{stroke:#8ee3d5;stroke-width:.38;filter:drop-shadow(0 0 5px rgba(111,213,212,.4))}
+#journey .journey-v3-node{border:1px solid rgba(195,241,147,.82);background:radial-gradient(circle,#ecffff 0 17%,#7bddda 22% 42%,rgba(111,213,212,.18) 45% 100%);box-shadow:0 0 0 4px rgba(111,213,212,.08),0 0 17px rgba(111,213,212,.28)}
+#journey .journey-v3-node::after{inset:3px;background:#efffff;box-shadow:0 0 8px rgba(216,255,255,.75)}
+@media (max-width:720px){#journey .journey-v3-card{min-height:0;grid-template-columns:1fr}#journey .journey-v3-image{height:clamp(250px,64vw,340px)}#journey .journey-v3-copy{padding:27px 22px}#journey .journey-v3-copy h4{font-size:clamp(2rem,9vw,2.65rem)}}

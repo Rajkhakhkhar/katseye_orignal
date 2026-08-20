@@ -1,0 +1,2 @@
+/* A non-layout overlay lets the current chapter recede before the archive opens. */
+.present-day>.present-archive-curtain{position:absolute;z-index:2;inset:0;pointer-events:none;background:rgba(1,8,12,.24);opacity:0;transition:opacity 1s cubic-bezier(.22,.76,.22,1);will-change:opacity}.present-day.is-chapter-exiting .present-archive-curtain{opacity:1}@media (prefers-reduced-motion:reduce){.present-archive-curtain{display:none}}

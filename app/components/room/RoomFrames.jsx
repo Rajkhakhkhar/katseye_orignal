@@ -1,7 +1,6 @@
 import { useLoader } from '@react-three/fiber';
 import { useMemo } from 'react';
 import * as THREE from 'three';
-import LaraRoomDecor from './RoomDecor';
 
 const DEFAULT_STYLE = Object.freeze({
   borderColor: '#9ca5ad',
@@ -130,11 +129,8 @@ function LaraLayoutFrames() {
   return null;
 }
 export function AdaptiveFrameGallery({ frames = [], frameStyle }) {
-  const isLara = frameStyle?.borderColor === '#8f7658';
   return <>
     {frames.map((frame, index) => <AdaptiveGalleryFrame key={frame.id || frame.src || index} {...frame} frameStyle={{ ...frameStyle, ...frame.frameStyle }} />)}
-    {isLara && <LaraLayoutFrames frameStyle={frameStyle} />}
-    {isLara && <LaraRoomDecor />}
   </>;
 }
 

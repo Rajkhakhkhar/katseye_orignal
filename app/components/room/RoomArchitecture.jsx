@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import * as THREE from 'three';
 import { useRoomSurfaceMaps } from './RoomMaterials';
 import { AdaptiveFrameGallery } from './RoomFrames';
+import RoomDecor from './RoomDecor';
 import { LARA_NICHE_LAYOUT, ROOM } from './roomConfig';
 
 function RoseGoldTrimMaterial() {
@@ -122,9 +123,13 @@ function BackWallCenterpiece() {
 }
 
 export default function RoomArchitecture({ theme }) {
-  const surfacePreset = theme?.surfacePreset || 'base-neutral';
-  const surfaces = useRoomSurfaceMaps(surfacePreset);
-  const isTextile = surfacePreset === 'lara-cheetah-temp' && Boolean(surfaces.floor.material);
+  // Themes own their visual layers. Legacy `surfacePreset` remains supported
+  // while new rooms use `materialPreset`; the generic decor remains a fallback.
+  const materialPreset = theme?.materialPreset || theme?.surfacePreset || 'base-neutral';
+  const DecorComponent = theme?.decorComponent || RoomDecor;
+  const architecturePreset = theme?.architecturePreset;
+  const surfaces = useRoomSurfaceMaps(materialPreset);
+  const isTextile = materialPreset === 'lara-cheetah-temp' && Boolean(surfaces.floor.material);
   const roomCenterZ = ROOM.entranceZ - ROOM.length / 2;
 
   return <>
@@ -147,5 +152,10 @@ export default function RoomArchitecture({ theme }) {
     <BackWallCenterpiece />
     <RoseGoldArchitecturalTrim roomCenterZ={roomCenterZ} />
     <AdaptiveFrameGallery frames={theme?.frames} frameStyle={theme?.frameStyle} />
+    <DecorComponent
+      theme={theme}
+      preset={theme?.decorPreset || theme?.id}
+      architecturePreset={architecturePreset}
+    />
   </>;
 }

@@ -1,17 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import LightstickExperience from './LightstickExperience';
+import HeroExperience from './components/HeroExperience';
 import DoorExperience from './components/DoorExperience';
+import JourneySection from './components/JourneySection';
+import KatseyeUniverse from './components/KatseyeUniverse';
+import GlobalMotion from './components/GlobalMotion';
+import CinematicSectionTransitions from './components/CinematicSectionTransitions';
 import './styles.css';
-
-const heroGirls = [
-  { name: 'LARA', image: '/hero-lara-hq.png', number: '01', accent: 'gold' },
-  { name: 'DANIELA', image: '/hero-daniela-hq.png', number: '02', accent: 'violet' },
-  { name: 'MEGAN', image: '/hero-megan-hq.png', number: '03', accent: 'blue' },
-  { name: 'YOONCHAE', image: '/hero-yoonchae-hq.png', number: '04', accent: 'coral' },
-  { name: 'MANON', image: '/hero-manon-hq.png', number: '05', accent: 'lime' },
-  { name: 'SOPHIA', image: '/hero-sophia-hq.png', number: '06', accent: 'pink' },
-];
+import './section-atmospheres.css';
 
 const eraData = {
   default: {
@@ -54,8 +51,6 @@ const eraData = {
 function App() {
   const [progress, setProgress] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [activeGirl, setActiveGirl] = useState(0);
-  const [heroLocked, setHeroLocked] = useState(false);
   const [era, setEra] = useState(null);
   const [bossCursor, setBossCursor] = useState({ x: -100, y: -100, visible: false });
   const [activeMemberRoom, setActiveMemberRoom] = useState(null);
@@ -66,12 +61,11 @@ function App() {
       const max = document.documentElement.scrollHeight - window.innerHeight;
       setProgress(max ? (window.scrollY / max) * 100 : 0);
       setBossCursor((current) => current.visible ? { ...current, visible: false } : current);
-      if (!heroLocked) setActiveGirl(Math.min(5, Math.max(0, Math.floor(window.scrollY / window.innerHeight))));
     };
     update();
     window.addEventListener('scroll', update, { passive: true });
     return () => window.removeEventListener('scroll', update);
-  }, [heroLocked]);
+  }, []);
 
   useEffect(() => {
     if (!activeMemberRoom) return undefined;
@@ -88,10 +82,16 @@ function App() {
     setActiveMemberRoom(member);
   };
 
+  const selectEra = (key) => {
+    setEra(era === key ? null : key);
+  };
+
   const currentEra = eraData[era || 'default'];
   const cursorAsset = era === 'sis' ? '/cursor-flower.png' : era === 'chaos' ? '/cursor-knife.png' : era === 'wild' ? '/cursor-paw.png' : null;
 
   return <main>
+    <GlobalMotion />
+    <CinematicSectionTransitions />
     <div className="grain" aria-hidden="true" />
     <div className="scroll-progress" style={{ transform: `scaleX(${progress / 100})` }} />
     <header className="site-header">
@@ -102,32 +102,13 @@ function App() {
 
     <div className={`menu-panel ${menuOpen ? 'is-open' : ''}`}>
       <a href="#boss" onClick={() => setMenuOpen(false)}>01 / ERA ARCHIVE</a>
-      <a href="#signal" onClick={() => setMenuOpen(false)}>02 / Next chapter</a>
-      <a href="#top" onClick={() => setMenuOpen(false)}>03 / Back to orbit</a>
+      <a href="#journey" onClick={() => setMenuOpen(false)}>02 / THE JOURNEY</a>
+      <a href="#universe" onClick={() => setMenuOpen(false)}>03 / NOW</a>
+      <a href="#signal" onClick={() => setMenuOpen(false)}>04 / Next chapter</a>
+      <a href="#top" onClick={() => setMenuOpen(false)}>05 / Back to orbit</a>
     </div>
 
-    <section className="hero-sequence" id="top" aria-label="Katseye member introduction">
-      <div className="hero-sticky">
-        <div className="liquid-lines" aria-hidden="true"><i /><i /><i /><i /></div>
-        <div className="hero-starfield" aria-hidden="true"><i /><i /><i /><i /><i /><i /><i /><i /></div>
-        <div className="hero-giant-word" aria-hidden="true">KATSEYE</div>
-        <div className="hero-interface top-left"><span>01</span><i /><span>THE EYE IS OPEN</span></div>
-        <div className="hero-interface top-right"><span>LIVE / 06</span><i /><span>SCROLL EXPERIENCE</span></div>
-        <div className="hero-frame" aria-hidden="true"><span /><span /><span /><span /></div>
-        <div className="hero-haze haze-one" aria-hidden="true" /><div className="hero-haze haze-two" aria-hidden="true" />
-        {heroGirls.map((girl, index) => <article className={`girl-scene tone-${girl.accent} ${index === activeGirl ? 'is-active' : ''}`} key={girl.name} aria-hidden={index !== activeGirl}>
-          <div className="name-shadow">{girl.name}</div>
-          <img className="hero-girl" src={girl.image} alt={index === activeGirl ? `${girl.name} of Katseye` : ''} />
-          <div className="girl-orbit" aria-hidden="true"><span /><span /><span /></div>
-          <div className="girl-caption"><span>{girl.number} / 06</span><span>KATSEYE</span></div>
-        </article>)}
-        <div className="hero-annotation left">MEET THE GIRLS</div>
-        <div className="hero-annotation right"><span className="scroll-word">SCROLL</span> <b>{String(activeGirl + 1).padStart(2, '0')}</b> / 06</div>
-        <button className={`hero-lock ${heroLocked ? 'is-locked' : ''}`} onClick={() => setHeroLocked(!heroLocked)} aria-pressed={heroLocked}><span className="lock-dot" /> {heroLocked ? 'BACK TO SCROLL' : 'TAP TO LOCK'}</button>
-        <div className="hero-rhythm" aria-hidden="true">FEEL THE FREQUENCY - FEEL THE FREQUENCY - FEEL THE FREQUENCY - </div>
-        <div className="hero-scroll-track" aria-hidden="true"><span style={{ transform: `scaleY(${(activeGirl + 1) / 6})` }} /></div>
-      </div>
-    </section>
+    <HeroExperience />
 
     <section className={`boss-section era-${era} ${era && bossCursor.visible ? 'has-era-cursor' : ''}`} id="boss" onMouseMove={(event) => era && setBossCursor({ x: event.clientX, y: event.clientY, visible: true })} onMouseLeave={() => setBossCursor((current) => ({ ...current, visible: false }))}>
       <div className="boss-noise" aria-hidden="true" />
@@ -137,7 +118,7 @@ function App() {
         <div><p className="section-index">01 - ERA ARCHIVE</p><p className="boss-status"><span /> LIVE ERA SELECTOR / 2026</p></div>
         <div className="era-switcher" aria-label="Select an era">
           <span className="era-label">ERA</span>
-          {Object.entries(eraData).filter(([key]) => key !== 'default').map(([key, item]) => <button key={key} className={era === key ? 'is-active' : ''} onClick={() => setEra(era === key ? null : key)} aria-pressed={era === key}>{item.label}</button>)}
+          {Object.entries(eraData).filter(([key]) => key !== 'default').map(([key, item]) => <button key={key} className={era === key ? 'is-active' : ''} onClick={() => selectEra(key)} aria-pressed={era === key}>{item.label}</button>)}
         </div>
       </header>
 
@@ -158,6 +139,8 @@ function App() {
       {cursorAsset && <div className={`era-cursor era-cursor-${era} ${bossCursor.visible ? 'is-visible' : ''}`} style={{ left: bossCursor.x, top: bossCursor.y }} aria-hidden="true"><img src={cursorAsset} alt="" /></div>}
     </section>
 
+    <JourneySection />
+    <KatseyeUniverse />
     <LightstickExperience onMemberSelect={openMemberRoom} />
     {activeMemberRoom && <DoorExperience member={activeMemberRoom} onExit={() => setActiveMemberRoom(null)} />}
     <footer><span>KATSEYE / UNOFFICIAL FAN PROJECT</span><span>2026</span><span>MADE TO MOVE</span></footer>

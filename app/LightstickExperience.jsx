@@ -11,12 +11,12 @@ gsap.registerPlugin(ScrollTrigger);
 const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
 
 const memberCards = [
-  ['Yoonchae', 'Soothing Shell', '/charm-yoonchae-hq.png'],
-  ['Sophia', 'Dream Anchor', '/charm-sophia-hq.png'],
-  ['Megan', 'Dual Cherry', '/charm-megan-hq.png'],
-  ['Daniela', 'Guardian Shield', '/charm-daniela-hq.png'],
-  ['Lara', 'Limitless Key', '/charm-lara-hq.png'],
-  ['Manon', 'Stellar Tiara', '/charm-manon-hq.png'],
+  ['Yoonchae', 'Soothing Shell', '/charm-card-backs/yoonchae.png'],
+  ['Sophia', 'Dream Anchor', '/charm-card-backs/sophia.png'],
+  ['Megan', 'Dual Cherry', '/charm-card-backs/megan.png'],
+  ['Daniela', 'Guardian Shield', '/charm-card-backs/daniela.png'],
+  ['Lara', 'Limitless Key', '/charm-card-backs/lara.png'],
+  ['Manon', 'Stellar Tiara', '/charm-card-backs/manon.png'],
 ];
 
 // This configuration is the clean hand-off point for each future member
@@ -165,13 +165,13 @@ function PortalHall({ hovered, setHovered, onSelect }) {
   </>;
 }
 
-function UniverseHub({ onMemberSelect }) {
+function UniverseHub({ onMemberSelect, sectionRef }) {
   const [hovered, setHovered] = useState(null);
   const active = universePortals.find((portal) => portal.id === hovered);
   const enterPortal = (portal) => {
     onMemberSelect?.(portal);
   };
-  return <section className="afterglow-section universe-hub" aria-label="Entrance to the six Katseye universes">
+  return <section ref={sectionRef} className="afterglow-section universe-hub door-handoff-pending" aria-label="Entrance to the six Katseye universes">
     <div className="universe-hub-stage">
       <Canvas className="universe-hub-canvas" camera={{ position: [0, 0, 12.5], fov: 45 }} dpr={[1, 1.75]} shadows gl={{ antialias: true }}>
         <color attach="background" args={['#080914']} /><fog attach="fog" args={['#080914', 8, 19]} />
@@ -458,6 +458,7 @@ export default function LightstickExperience({ onMemberSelect }) {
   const pinRef = useRef();
   const galleryOverlayRef = useRef();
   const galleryTrackRef = useRef();
+  const doorsRef = useRef();
   const progressRef = useRef(0);
   useLayoutEffect(() => {
     const context = gsap.context(() => {
@@ -466,8 +467,11 @@ export default function LightstickExperience({ onMemberSelect }) {
       const galleryDuration = 4.5;
       const settlingHold = 0.45;
       const totalDuration = fallDuration + galleryDuration + settlingHold;
+      const finishHandoff = () => doorsRef.current?.classList.add('is-door-ready');
+      const resetHandoff = () => doorsRef.current?.classList.remove('is-door-ready');
+      sequenceRef.current?.style.setProperty('--lightstick-scroll-height', `${totalDuration * 100}vh`);
       gsap.set(galleryOverlayRef.current, { autoAlpha: 0 });
-      const fallTimeline = gsap.timeline({ scrollTrigger: {
+      const masterTimeline = gsap.timeline({ scrollTrigger: {
         // The wrapper contains three real, one-viewport sections.  Using their
         // measured height keeps the pin and the fall phases locked together.
         trigger: sequenceRef.current,
@@ -478,22 +482,35 @@ export default function LightstickExperience({ onMemberSelect }) {
         scrub: true,
         anticipatePin: 1,
         invalidateOnRefresh: true,
+        onLeave: finishHandoff,
+        onEnterBack: resetHandoff,
+        onRefresh: (trigger) => {
+          if (trigger.progress >= .999) finishHandoff();
+          else resetHandoff();
+        },
         // The impact locks at 100% while the member cards take over the same
         // pinned scene, so the landed lightstick remains on screen throughout.
         onUpdate: (trigger) => { progressRef.current = Math.min(1, trigger.progress / (fallDuration / totalDuration)); },
       } });
       // One uninterrupted, scroll-scrubbed scene: fall → impact → cards.  The
       // cards cannot enter until the lightstick has fully landed.
-      fallTimeline
+      masterTimeline
         .to(lightstickProgress, { value: 1, duration: fallDuration, ease: 'none' })
         .set(galleryOverlayRef.current, { autoAlpha: 1 })
         .fromTo(galleryTrackRef.current,
           { x: () => window.innerWidth },
           { x: () => -galleryTrackRef.current.scrollWidth, duration: galleryDuration, ease: 'none' },
         )
-        .to({}, { duration: settlingHold });
+        .to({}, { duration: settlingHold })
+        .call(finishHandoff);
     });
-    return () => context.revert();
+    const refresh = window.requestAnimationFrame(() => ScrollTrigger.refresh());
+    return () => {
+      window.cancelAnimationFrame(refresh);
+      doorsRef.current?.classList.remove('is-door-ready');
+      sequenceRef.current?.style.removeProperty('--lightstick-scroll-height');
+      context.revert();
+    };
   }, []);
 
   return <>
@@ -511,7 +528,6 @@ export default function LightstickExperience({ onMemberSelect }) {
                 </div>
                 <div className="impact-card-face impact-card-back">
                   <img src={image} alt={`${name}'s ${title} charm card`} />
-                  <div className="charm-card-copy"><span>{name}</span><strong>{title}</strong></div>
                 </div>
               </div>
             </article>)}
@@ -523,6 +539,6 @@ export default function LightstickExperience({ onMemberSelect }) {
       <section className="lightstick-scene-section" id="section-4" aria-label="Section 4: lightstick rotations" />
       <section className="lightstick-scene-section" id="section-5" aria-label="Section 5: lightstick impact" />
     </div>
-    <UniverseHub onMemberSelect={onMemberSelect} />
+    <UniverseHub onMemberSelect={onMemberSelect} sectionRef={doorsRef} />
   </>;
 }

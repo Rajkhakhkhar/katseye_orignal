@@ -16,11 +16,50 @@ const surfaceProfiles = {
 const laraProfiles = {
   // One source material, adjusted per physical plane so it reads as continuous
   // upholstered short-pile carpet instead of a repeated wallpaper tile.
-  floor: { repeat: [.94, 2.04], offset: [.13, .19], rotation: -.018, color: '#765845', roughness: .985, bumpScale: .024, detail: .56 },
-  ceiling: { repeat: [.94, 2.04], offset: [.41, .27], rotation: .012, color: '#66503c', roughness: .99, bumpScale: .016, detail: .34 },
-  wall: { repeat: [1.48, .64], offset: [.31, .26], rotation: -.009, color: '#efd4aa', roughness: .965, bumpScale: .016, detail: .42 },
-  backWall: { repeat: [.82, .9], offset: [.2, .12], rotation: 0, color: '#72543c', roughness: .985, bumpScale: .018, detail: .4 },
+  floor: { repeat: [.94, 2.04], offset: [.13, .19], rotation: -.018, color: '#241c1d', roughness: .985, bumpScale: .024, detail: .56 },
+  ceiling: { repeat: [.94, 2.04], offset: [.41, .27], rotation: .012, color: '#171316', roughness: .99, bumpScale: .016, detail: .34 },
+  wall: { repeat: [1.48, .64], offset: [.31, .26], rotation: -.009, color: '#4a3328', roughness: .965, bumpScale: .016, detail: .42 },
+  backWall: { repeat: [.82, .9], offset: [.2, .12], rotation: 0, color: '#261a17', roughness: .985, bumpScale: .018, detail: .4 },
 };
+
+const memberMaterialProfiles = Object.freeze({
+  'sophia-luxury': Object.freeze({
+    floor: { color: '#2c170e', roughness: .34 },
+    ceiling: { color: '#4b2d1d', roughness: .5 },
+    wall: { color: '#e8dbc4', roughness: .68 },
+    backWall: { color: '#3a2419', roughness: .5 },
+  }),
+  'sophia-ivory': Object.freeze({
+    floor: { color: '#3d281d', roughness: .52 },
+    ceiling: { color: '#f4e6ce', roughness: .82 },
+    wall: { color: '#ead8bb', roughness: .74 },
+    backWall: { color: '#4a3023', roughness: .62 },
+  }),
+  'daniela-burgundy': Object.freeze({
+    floor: { color: '#120c0e', roughness: .44 },
+    ceiling: { color: '#231216', roughness: .66 },
+    wall: { color: '#642631', roughness: .58 },
+    backWall: { color: '#180d10', roughness: .52 },
+  }),
+  'megan-charcoal': Object.freeze({
+    floor: { color: '#17191c', roughness: .42 },
+    ceiling: { color: '#30343a', roughness: .54 },
+    wall: { color: '#3b3f45', roughness: .48 },
+    backWall: { color: '#16191d', roughness: .44 },
+  }),
+  'manon-concrete': Object.freeze({
+    floor: { color: '#202124', roughness: .8 },
+    ceiling: { color: '#2c2e31', roughness: .9 },
+    wall: { color: '#494b4f', roughness: .86 },
+    backWall: { color: '#1b1c1f', roughness: .72 },
+  }),
+  'yoonchae-peach': Object.freeze({
+    floor: { color: '#9b654f', roughness: .58 },
+    ceiling: { color: '#fff0dd', roughness: .86 },
+    wall: { color: '#f4c9ad', roughness: .68 },
+    backWall: { color: '#d89b78', roughness: .62 },
+  }),
+});
 
 function configureTexture(texture, repeat, colorSpace = THREE.NoColorSpace, transform = {}) {
   texture.wrapS = transform.mirrored ? THREE.MirroredRepeatWrapping : THREE.RepeatWrapping;
@@ -183,6 +222,15 @@ function createGraphiteArchitecturalSurface(kind, material) {
   };
 }
 
+function createMemberSurface(kind, material) {
+  const source = createRoomSurface(kind === 'backWall' ? 'wall' : kind);
+  return {
+    bump: source.bump,
+    roughness: source.roughness,
+    material: { bumpScale: .055, ...material },
+  };
+}
+
 function useLaraTexture(enabled) {
   const [texture, setTexture] = useState(null);
 
@@ -221,13 +269,27 @@ export function useRoomSurfaceMaps(surfacePreset = 'base-neutral') {
     sideWall: createLaraSurface(laraSource, 'wall'),
     backWall: createLaraSurface(laraSource, 'backWall'),
   } : null), [laraSource]);
+  const memberMaps = useMemo(() => {
+    const profile = memberMaterialProfiles[surfacePreset];
+    if (!profile) return null;
+    return {
+      floor: createMemberSurface('floor', profile.floor),
+      ceiling: createMemberSurface('ceiling', profile.ceiling),
+      sideWall: createMemberSurface('wall', profile.wall),
+      backWall: createMemberSurface('backWall', profile.backWall),
+    };
+  }, [surfacePreset]);
 
   useEffect(() => () => disposeSurfaceMaps(neutralMaps), [neutralMaps]);
   useEffect(() => () => {
     if (laraMaps) disposeSurfaceMaps(laraMaps);
   }, [laraMaps]);
+  useEffect(() => () => {
+    if (memberMaps) disposeSurfaceMaps(memberMaps);
+  }, [memberMaps]);
 
-  return surfacePreset === 'lara-cheetah-temp' && laraMaps ? laraMaps : neutralMaps;
+  if (surfacePreset === 'lara-cheetah-temp' && laraMaps) return laraMaps;
+  return memberMaps || neutralMaps;
 }
 
 // This generated base-color provides the current carpet pass. Production PBR

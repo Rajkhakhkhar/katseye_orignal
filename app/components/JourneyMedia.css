@@ -1,0 +1,3 @@
+.journey-v3-image{background:#f7f5f2}
+.journey-v3-image>img{object-fit:contain!important;object-position:center!important;background:#f7f5f2;transition:none!important}
+.journey-v3-card.is-visible:hover .journey-v3-image>img{transform:none!important}

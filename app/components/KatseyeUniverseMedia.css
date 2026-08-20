@@ -1,0 +1,26 @@
+.present-media-image {
+  display: block;
+  object-fit: cover;
+  object-position: center;
+  overflow: hidden;
+}
+
+.present-media-image.present-wild-image,
+.present-media-image.present-film-poster,
+.present-media-image.present-ribbon-poster {
+  width: 100%;
+  max-width: none;
+}
+
+.present-media-image.present-wild-image {
+  height: clamp(410px, 52vw, 700px);
+}
+
+.present-media-image.present-film-poster {
+  height: clamp(480px, 58vw, 720px);
+}
+
+@media (max-width: 760px) {
+  .present-media-image.present-wild-image { height: 440px; }
+  .present-media-image.present-film-poster { height: 470px; }
+}
