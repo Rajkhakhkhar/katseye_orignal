@@ -60,11 +60,14 @@ export default function PlayerControls({ onReady }) {
   }, [gl]);
 
   useFrame((state, delta) => {
+    // Clamp after tab wakes / frame stalls so movement never jumps through a
+    // display. Damping retains a tiny, deliberate camera inertia.
+    const frameDelta = Math.min(delta, .05);
     const entrance = clamp(state.clock.elapsedTime / 1.15, 0, 1);
     const easedEntrance = entrance * entrance * (3 - 2 * entrance);
     const controls = view.current;
-    controls.yaw = THREE.MathUtils.damp(controls.yaw, controls.targetYaw, 13, delta);
-    controls.pitch = THREE.MathUtils.damp(controls.pitch, controls.targetPitch, 13, delta);
+    controls.yaw = THREE.MathUtils.damp(controls.yaw, controls.targetYaw, 10, frameDelta);
+    controls.pitch = THREE.MathUtils.damp(controls.pitch, controls.targetPitch, 10, frameDelta);
     camera.rotation.order = 'YXZ';
     camera.rotation.y = controls.yaw;
     camera.rotation.x = controls.pitch;
@@ -87,15 +90,16 @@ export default function PlayerControls({ onReady }) {
       -Math.cos(controls.yaw) * forward + Math.sin(controls.yaw) * sideways,
     );
     if (desired.lengthSq() > 0) desired.normalize().multiplyScalar(2.8);
-    controls.velocity.lerp(desired, 1 - Math.exp(-7 * delta));
+    controls.velocity.x = THREE.MathUtils.damp(controls.velocity.x, desired.x, 8.5, frameDelta);
+    controls.velocity.z = THREE.MathUtils.damp(controls.velocity.z, desired.z, 8.5, frameDelta);
 
     controls.scrollTarget = clamp(
-      controls.scrollTarget + controls.velocity.z * delta,
+      controls.scrollTarget + controls.velocity.z * frameDelta,
       ROOM.backWallZ + 1.25,
       ROOM.entranceZ - .45,
     );
-    const nextX = clamp(camera.position.x + controls.velocity.x * delta, -3.5, 3.5);
-    const nextZ = THREE.MathUtils.damp(camera.position.z, controls.scrollTarget, 3.7, delta);
+    const nextX = clamp(camera.position.x + controls.velocity.x * frameDelta, -3.5, 3.5);
+    const nextZ = THREE.MathUtils.damp(camera.position.z, controls.scrollTarget, 4.5, frameDelta);
     camera.position.set(nextX, ROOM.cameraHeight, nextZ);
   });
 

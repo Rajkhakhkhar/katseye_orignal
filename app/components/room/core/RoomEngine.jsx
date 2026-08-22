@@ -1,6 +1,7 @@
 import CameraController from './CameraController';
 import Lighting from './Lighting';
 import RoomAudio from './RoomAudio';
+import RoomAtmosphere from './RoomAtmosphere';
 import RoomLayout from './RoomLayout';
 import { getMemberRoomTheme } from '../themes';
 
@@ -13,6 +14,7 @@ export default function RoomEngine({ member, onReady }) {
     <RoomAudio member={member} />
     <CameraController onReady={onReady} />
     <Lighting theme={theme} />
+    <RoomAtmosphere />
     <RoomLayout member={member} theme={theme} />
   </>;
 }

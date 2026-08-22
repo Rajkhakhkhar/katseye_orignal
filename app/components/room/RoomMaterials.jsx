@@ -2,7 +2,10 @@ import { useEffect, useMemo, useState } from 'react';
 import * as THREE from 'three';
 import laraCheetahBaseColor from '../../assets/room/lara/lara-cheetah-carpet-reference.jpg';
 
-const MAP_SIZE = 384;
+// These are architectural detail maps, not close-up product textures. A
+// smaller resolution materially reduces room-entry work while preserving the
+// imperceptible grain visible at gallery viewing distances.
+const MAP_SIZE = 256;
 
 const surfaceProfiles = {
   floor: { base: [102, 109, 117], variation: 17, roughness: 138, repeat: [3.2, 8.5] },
@@ -85,9 +88,10 @@ function noise(x, y) {
   return value - Math.floor(value);
 }
 
-function createRoomSurface(kind) {
+function createRoomSurface(kind, { includeColor = true } = {}) {
   const profile = surfaceProfiles[kind];
-  const canvases = ['color', 'bump', 'roughness'].reduce((set, key) => {
+  const textureKinds = includeColor ? ['color', 'bump', 'roughness'] : ['bump', 'roughness'];
+  const canvases = textureKinds.reduce((set, key) => {
     const canvas = document.createElement('canvas');
     canvas.width = MAP_SIZE;
     canvas.height = MAP_SIZE;
@@ -108,10 +112,12 @@ function createRoomSurface(kind) {
       const bump = Math.round(108 + depth * 46);
       const roughness = Math.round(profile.roughness + (1 - depth) * 34);
 
-      images.color.data[index] = profile.base[0] + tone;
-      images.color.data[index + 1] = profile.base[1] + tone;
-      images.color.data[index + 2] = profile.base[2] + tone;
-      images.color.data[index + 3] = 255;
+      if (includeColor) {
+        images.color.data[index] = profile.base[0] + tone;
+        images.color.data[index + 1] = profile.base[1] + tone;
+        images.color.data[index + 2] = profile.base[2] + tone;
+        images.color.data[index + 3] = 255;
+      }
       images.bump.data[index] = bump;
       images.bump.data[index + 1] = bump;
       images.bump.data[index + 2] = bump;
@@ -125,7 +131,7 @@ function createRoomSurface(kind) {
 
   Object.entries(contexts).forEach(([key, context]) => context.putImageData(images[key], 0, 0));
   return {
-    color: createTexture(canvases.color, profile.repeat, true),
+    ...(includeColor ? { color: createTexture(canvases.color, profile.repeat, true) } : {}),
     bump: createTexture(canvases.bump, profile.repeat),
     roughness: createTexture(canvases.roughness, profile.repeat),
   };
@@ -144,7 +150,7 @@ function clampByte(value) {
 }
 
 function createFabricDetailMaps(source, profile) {
-  const size = 512;
+  const size = 256;
   const canvas = document.createElement('canvas');
   canvas.width = size;
   canvas.height = size;
@@ -223,7 +229,7 @@ function createGraphiteArchitecturalSurface(kind, material) {
 }
 
 function createMemberSurface(kind, material) {
-  const source = createRoomSurface(kind === 'backWall' ? 'wall' : kind);
+  const source = createRoomSurface(kind === 'backWall' ? 'wall' : kind, { includeColor: false });
   return {
     bump: source.bump,
     roughness: source.roughness,
@@ -256,13 +262,23 @@ function useLaraTexture(enabled) {
 }
 
 export function useRoomSurfaceMaps(surfacePreset = 'base-neutral') {
-  const neutralMaps = useMemo(() => ({
+  const isLara = surfacePreset === 'lara-cheetah-temp';
+  const hasMemberProfile = Boolean(memberMaterialProfiles[surfacePreset]);
+  const neutralMaps = useMemo(() => (!isLara && !hasMemberProfile ? {
     floor: createRoomSurface('floor'),
     ceiling: createRoomSurface('ceiling'),
     sideWall: createRoomSurface('wall'),
     backWall: createRoomSurface('wall'),
-  }), []);
-  const laraSource = useLaraTexture(surfacePreset === 'lara-cheetah-temp');
+  } : null), [hasMemberProfile, isLara]);
+  // Lara needs a lightweight neutral material only while its fabric source is
+  // decoding; themed rooms no longer build an unused neutral map set.
+  const laraFallbackMaps = useMemo(() => (isLara ? {
+    floor: createRoomSurface('floor'),
+    ceiling: createRoomSurface('ceiling'),
+    sideWall: createRoomSurface('wall'),
+    backWall: createRoomSurface('wall'),
+  } : null), [isLara]);
+  const laraSource = useLaraTexture(isLara);
   const laraMaps = useMemo(() => (laraSource ? {
     floor: createLaraSurface(laraSource, 'floor'),
     ceiling: createLaraSurface(laraSource, 'ceiling'),
@@ -280,7 +296,12 @@ export function useRoomSurfaceMaps(surfacePreset = 'base-neutral') {
     };
   }, [surfacePreset]);
 
-  useEffect(() => () => disposeSurfaceMaps(neutralMaps), [neutralMaps]);
+  useEffect(() => () => {
+    if (neutralMaps) disposeSurfaceMaps(neutralMaps);
+  }, [neutralMaps]);
+  useEffect(() => () => {
+    if (laraFallbackMaps) disposeSurfaceMaps(laraFallbackMaps);
+  }, [laraFallbackMaps]);
   useEffect(() => () => {
     if (laraMaps) disposeSurfaceMaps(laraMaps);
   }, [laraMaps]);
@@ -288,7 +309,7 @@ export function useRoomSurfaceMaps(surfacePreset = 'base-neutral') {
     if (memberMaps) disposeSurfaceMaps(memberMaps);
   }, [memberMaps]);
 
-  if (surfacePreset === 'lara-cheetah-temp' && laraMaps) return laraMaps;
+  if (isLara) return laraMaps || laraFallbackMaps;
   return memberMaps || neutralMaps;
 }
 

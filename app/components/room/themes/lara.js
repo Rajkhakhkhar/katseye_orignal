@@ -1,5 +1,8 @@
 import { baseTheme } from './baseTheme';
-import LaraFinalMuseum from '../LaraFinalMuseum';
+import { lazy } from 'react';
+import { getRoomGalleryFrames } from '../roomGalleryFrames';
+
+const LaraFinalMuseum = lazy(() => import('../LaraFinalMuseum'));
 
 export default Object.freeze({
   ...baseTheme,
@@ -10,12 +13,12 @@ export default Object.freeze({
   decorComponent: LaraFinalMuseum,
   frameStyle: Object.freeze({
     decorPreset: 'lara',
-    borderColor: '#8f7658',
+    borderColor: '#4a3022',
     borderMetalness: .78,
     borderRoughness: .3,
-    backingColor: '#130f0c',
-    borderThickness: .075,
-    depth: .06,
+    backingColor: '#100d0c',
+    borderThickness: .11,
+    depth: .1,
   }),
-  frames: Object.freeze([]),
+  frames: Object.freeze(getRoomGalleryFrames('lara')),
 });

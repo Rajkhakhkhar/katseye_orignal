@@ -1,6 +1,7 @@
 import { useLoader, } from '@react-three/fiber';
 import * as THREE from 'three';
 import DanielaIdentityArchitecture from './DanielaIdentityArchitecture';
+import MemberStoryProps from './MemberStoryProps';
 import danceRunner from '../../assets/room/daniela/daniela-burgundy-dance-runner.png';
 
 const BRASS = '#bd9161';
@@ -47,4 +48,4 @@ function MinimalPlant({ side }) { return <group name={`daniela-minimal-plant-${s
 
 function DanielaMuseumCuration() { return <group name="daniela-asymmetric-performance-museum-curation"><Showcase side={-1} z={7.08} width={1.7} height={3.65} title="awards archive"><AwardsAndCertificates /></Showcase><Showcase side={-1} z={-6.62} width={2.05} height={3.9} title="stage wardrobe"><PerformanceWardrobe /></Showcase><Showcase side={1} z={7.02} width={1.82} height={3.75} title="dance archive"><ChoreographyArchive /></Showcase><Showcase side={1} z={-6.4} width={2.18} height={3.92} title="accessories archive"><AccessoriesArchive /></Showcase><MinimalPlant side={-1} /><MinimalPlant side={1} /></group>; }
 
-export default function DanielaFinalMuseum() { return <><DanielaIdentityArchitecture /><DanielaRunner /><DanielaMuseumCuration /></>; }
+export default function DanielaFinalMuseum() { return <><DanielaIdentityArchitecture /><DanielaRunner /><DanielaMuseumCuration /><MemberStoryProps member="daniela" /></>; }

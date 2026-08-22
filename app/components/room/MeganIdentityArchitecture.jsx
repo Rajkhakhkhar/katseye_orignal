@@ -1,6 +1,7 @@
 import { useLayoutEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { ROOM } from './roomConfig';
+import MemberStoryProps from './MemberStoryProps';
 
 const CHARCOAL = '#151719';
 const STONE = '#101214';
@@ -49,4 +50,4 @@ function CreativeWallBay({ side, z, width, finish = 'walnut' }) {
 
 function MeganStage() { const z=ROOM.backWallZ+1.16; return <group name="megan-modern-creative-stage"><mesh position={[0,2.48,ROOM.backWallZ+.18]}><boxGeometry args={[7.8,4.68,.24]} /><SmokedStone color="#181a1c" /></mesh><mesh position={[0,2.48,ROOM.backWallZ+.34]}><boxGeometry args={[5.94,3.58,.06]} /><meshPhysicalMaterial color={WALNUT} metalness={.18} roughness={.34} clearcoat={.15} /></mesh>{[-2.62,2.62].map((x)=><mesh key={x} position={[x,2.48,ROOM.backWallZ+.41]}><boxGeometry args={[.055,3.72,.04]} /><Brass /></mesh>)}<mesh position={[0,.18,z]}><boxGeometry args={[6.52,.3,2.28]} /><SmokedStone /></mesh><mesh position={[0,.36,z+.02]}><boxGeometry args={[5.78,.07,1.84]} /><Brass color="#63432f" roughness={.21} /></mesh><mesh position={[0,.43,z+.02]}><boxGeometry args={[4.82,.12,1.38]} /><SmokedStone color="#1b1d1f" /></mesh><mesh position={[0,.5,z-.75]}><boxGeometry args={[4.25,.025,.025]} /><meshStandardMaterial color={WARM} emissive="#d68b44" emissiveIntensity={1.25} /></mesh></group>; }
 
-export default function MeganIdentityArchitecture() { return <group name="megan-warm-modern-creative-penthouse"><MeganCharcoalFloor /><MeganLuxuryCeiling /><MeganArtLight /><CreativeWallBay side={-1} z={6.1} width={2.6} finish="walnut" /><CreativeWallBay side={-1} z={1.2} width={1.85} finish="mirror" /><CreativeWallBay side={-1} z={-3.75} width={3.0} finish="fabric" /><CreativeWallBay side={1} z={5.65} width={3.1} finish="fabric" /><CreativeWallBay side={1} z={.9} width={1.85} finish="mirror" /><CreativeWallBay side={1} z={-4.05} width={2.65} finish="walnut" /><MeganStage /><MeganWarmGalleryLighting /></group>; }
+export default function MeganIdentityArchitecture() { return <group name="megan-warm-modern-creative-penthouse"><MeganCharcoalFloor /><MeganLuxuryCeiling /><MeganArtLight /><CreativeWallBay side={-1} z={6.1} width={2.6} finish="walnut" /><CreativeWallBay side={-1} z={1.2} width={1.85} finish="mirror" /><CreativeWallBay side={-1} z={-3.75} width={3.0} finish="fabric" /><CreativeWallBay side={1} z={5.65} width={3.1} finish="fabric" /><CreativeWallBay side={1} z={.9} width={1.85} finish="mirror" /><CreativeWallBay side={1} z={-4.05} width={2.65} finish="walnut" /><MeganStage /><MeganWarmGalleryLighting /><MemberStoryProps member="megan" /></group>; }

@@ -17,6 +17,7 @@ function BaseGalleryLighting() {
     <pointLight position={[0, 3.55, ROOM.backWallZ + 1.2]} color="#fffaf2" intensity={1.46} distance={8.1} decay={2} />
     <pointLight position={[-2.5, 2.75, ROOM.backWallZ + 1.32]} color="#e6edf0" intensity={.52} distance={5.5} decay={2} />
     <pointLight position={[2.5, 2.75, ROOM.backWallZ + 1.32]} color="#e6edf0" intensity={.52} distance={5.5} decay={2} />
+    <DisplaySpotlight position={[0, 4.72, -6.85]} target={[0, 3.4, ROOM.backWallZ + .34]} color="#fff4df" intensity={4.4} />
   </>;
 }
 
@@ -38,6 +39,7 @@ function MemberGalleryLighting({ preset }) {
     <hemisphereLight args={[mood.sky, mood.ground, mood.hemisphere]} />
     {[-1, 1].flatMap((side) => mood.wallRuns.map((z) => <pointLight key={`${preset}-wall-${side}-${z}`} position={[side * 3.42, 3.08, z]} color={mood.wall} intensity={mood.spots * .52} distance={4.7} decay={2} />))}
     {[-1, 1].flatMap((side) => [5.15, -4.5].map((z) => <DisplaySpotlight key={`${preset}-frame-${side}-${z}`} position={[side * 2.45, 4.6, z + .75]} target={[side * 3.78, 2.5, z]} color={mood.accent} intensity={mood.spots} />))}
+    <DisplaySpotlight position={[0, 4.72, -6.85]} target={[0, 3.4, ROOM.backWallZ + .34]} color={mood.stage} intensity={mood.spots * 1.22} />
     <pointLight position={[0, 4.35, 1.1]} color={mood.sky} intensity={mood.spots * .5} distance={7.4} decay={2} />
     <pointLight position={[0, 2.68, ROOM.backWallZ + 1.05]} color={mood.stage} intensity={mood.spots * 1.34} distance={5.7} decay={2} />
     <pointLight position={[0, .65, ROOM.backWallZ + 1.05]} color={mood.accent} intensity={mood.spots * .62} distance={4.8} decay={2} />

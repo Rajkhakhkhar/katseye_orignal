@@ -1,7 +1,7 @@
-import { useMemo } from 'react';
+import { Suspense, useMemo } from 'react';
 import * as THREE from 'three';
 import { useRoomSurfaceMaps } from './RoomMaterials';
-import { AdaptiveFrameGallery } from './RoomFrames';
+import { AdaptiveFrameGallery, FeatureWallInstallation } from './RoomFrames';
 import RoomDecor from './RoomDecor';
 import { LARA_NICHE_LAYOUT, ROOM } from './roomConfig';
 
@@ -128,6 +128,8 @@ export default function RoomArchitecture({ theme }) {
   const materialPreset = theme?.materialPreset || theme?.surfacePreset || 'base-neutral';
   const DecorComponent = theme?.decorComponent || RoomDecor;
   const architecturePreset = theme?.architecturePreset;
+  const heroFrame = theme?.frames?.find((frame) => frame.id === `${theme?.id}-hero`);
+  const supportingFrames = theme?.frames?.filter((frame) => frame !== heroFrame);
   const surfaces = useRoomSurfaceMaps(materialPreset);
   const isTextile = materialPreset === 'lara-cheetah-temp' && Boolean(surfaces.floor.material);
   const roomCenterZ = ROOM.entranceZ - ROOM.length / 2;
@@ -151,11 +153,14 @@ export default function RoomArchitecture({ theme }) {
     <LuxuryArchitecturalShell roomCenterZ={roomCenterZ} surfaces={surfaces} isTextile={isTextile} />
     <BackWallCenterpiece />
     <RoseGoldArchitecturalTrim roomCenterZ={roomCenterZ} />
-    <AdaptiveFrameGallery frames={theme?.frames} frameStyle={theme?.frameStyle} />
-    <DecorComponent
-      theme={theme}
-      preset={theme?.decorPreset || theme?.id}
-      architecturePreset={architecturePreset}
-    />
+    <Suspense fallback={null}>
+      <DecorComponent
+        theme={theme}
+        preset={theme?.decorPreset || theme?.id}
+        architecturePreset={architecturePreset}
+      />
+    </Suspense>
+    <AdaptiveFrameGallery frames={supportingFrames} frameStyle={theme?.frameStyle} />
+    {heroFrame && <Suspense fallback={null}><FeatureWallInstallation frame={heroFrame} /></Suspense>}
   </>;
 }

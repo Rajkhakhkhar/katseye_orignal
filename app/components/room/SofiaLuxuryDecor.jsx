@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { useLoader, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { ROOM } from './roomConfig';
+import MemberStoryProps from './MemberStoryProps';
 import monogramRug from '../../assets/room/sophia/sophia-ivory-monogram-rug.png';
 
 const IVORY = '#eee1c9';
@@ -212,9 +213,10 @@ function SofiaVintageMicrophone() {
   const stageZ = ROOM.backWallZ + .94;
   return <group name="sofia-vintage-microphone-performance-display" position={[0, .34, stageZ]}>
     <mesh position={[0, .05, 0]}><cylinderGeometry args={[.3, .36, .1, 36]} /><meshPhysicalMaterial color="#211816" metalness={.58} roughness={.2} clearcoat={.6} /></mesh>
-    <mesh position={[0, .78, 0]}><cylinderGeometry args={[.035, .05, 1.42, 22]} /><meshPhysicalMaterial color={CHAMPAGNE} metalness={.92} roughness={.15} /></mesh>
-    <mesh position={[0, 1.53, 0]}><capsuleGeometry args={[.12, .25, 8, 18]} /><meshPhysicalMaterial color="#e9e1d8" metalness={.86} roughness={.22} /></mesh>
-    <pointLight position={[0, 1.35, .16]} color="#ffe4af" intensity={.55} distance={2.4} decay={2} />
+    {/* A low stage display keeps the clear portrait field unobstructed. */}
+    <mesh position={[0, .38, 0]}><cylinderGeometry args={[.035, .05, .54, 22]} /><meshPhysicalMaterial color={CHAMPAGNE} metalness={.92} roughness={.15} /></mesh>
+    <mesh position={[0, .65, 0]}><capsuleGeometry args={[.12, .25, 8, 18]} /><meshPhysicalMaterial color="#e9e1d8" metalness={.86} roughness={.22} /></mesh>
+    <pointLight position={[0, .64, .16]} color="#ffe4af" intensity={.55} distance={2.4} decay={2} />
   </group>;
 }
 
@@ -236,7 +238,10 @@ export default function SofiaLuxuryDecor() {
         node.castShadow = !materials.some((material) => material?.transparent || material?.transmission > 0);
         node.receiveShadow = true;
       }
-      if (node.isSpotLight || node.isPointLight) {
+      // Point-light shadow maps multiply the render cost across Sofia's many
+      // sconces and showcase LEDs. The focused portrait spots retain the soft
+      // museum shadows; practical lights remain illumination-only.
+      if (node.isSpotLight || node.isDirectionalLight) {
         node.castShadow = true;
         node.shadow.mapSize.set(512, 512);
         node.shadow.bias = -.0004;
@@ -264,5 +269,6 @@ export default function SofiaLuxuryDecor() {
     {[-1, 1].map((side) => <SofiaPortraitConsole key={`console-${side}`} side={side} />)}
     {[-1, 1].map((side) => <SofiaPalm key={`palm-${side}`} side={side} />)}
     <SofiaVintageMicrophone />
+    <MemberStoryProps member="sophia" />
   </group>;
 }

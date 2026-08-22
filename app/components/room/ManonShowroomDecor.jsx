@@ -1,4 +1,5 @@
 import { ROOM } from './roomConfig';
+import MemberStoryProps from './MemberStoryProps';
 
 const CONCRETE = '#484b4d';
 const CONCRETE_DARK = '#24272a';
@@ -267,5 +268,6 @@ export default function ManonShowroomDecor() {
     <ManonLoungeBench />
     <ManonLoungeChair />
     <ManonStagePresentationTrim />
+    <MemberStoryProps member="manon" />
   </group>;
 }

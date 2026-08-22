@@ -1,4 +1,5 @@
 import { ROOM } from './roomConfig';
+import MemberStoryProps from './MemberStoryProps';
 
 const IVORY = '#f6ead8';
 const PEARL = '#fff8ed';
@@ -201,5 +202,6 @@ export default function YoonchaeLuxuryDecor() {
     <YoonchaeOrchid side={-1} />
     <YoonchaeOrchid side={1} />
     <YoonchaeStageFinish />
+    <MemberStoryProps member="yoonchae" />
   </group>;
 }
