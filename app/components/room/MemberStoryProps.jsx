@@ -292,7 +292,6 @@ export default function MemberStoryProps({ member }) {
   </group>;
 
   if (member === 'sophia') return <group name="sophia-luxury-fashion-boutique-zones">
-    <StoryMannequin position={[0, .28, -8.88]} color="#e6d5bb" label="sophia-hero-evening-look-mannequin" />
     <StoryCabinet side={-1} z={-5.85} label="sophia-designer-handbag-and-eyewear-cabinet" accent="#d1a467"><Handbag position={[0, .72, -.27]} color="#d0ae7e" name="sophia-champagne-handbag" /><Handbag position={[0, .02, .28]} color="#eee2ce" name="sophia-ivory-handbag" /><BookRun position={[0, -.66, 0]} palette={['#362b26', '#d1a467', '#eee2cf', '#715142']} name="sophia-luxury-fashion-books" /></StoryCabinet>
     <StoryCabinet side={1} z={-5.85} label="sophia-hats-sunglasses-and-jewelry-cabinet" accent="#d1a467"><JewelryTray position={[0, .72, -.26]} name="sophia-gold-accessories" /><PerfumeSet position={[0, .02, .25]} colors={['#ead7b9', '#c49b70', '#f5e9d6']} name="sophia-boutique-perfumes" /><FootwearPair position={[0, -.66, 0]} color="#d6b983" name="sophia-premium-heels" /></StoryCabinet>
     <StoryConsole side={-1} z={1.5} label="sophia-marble-pedestal-and-sculpture" top="#ddd0ba"><JewelryTray position={[-.22, .04, 0]} name="sophia-brass-sculpture-and-jewels" /><Handbag position={[.24, .04, 0]} color="#c8a478" name="sophia-clutch-on-pedestal" /></StoryConsole>

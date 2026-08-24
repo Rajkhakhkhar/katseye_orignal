@@ -13,7 +13,10 @@ export default function RoomEngine({ member, onReady }) {
   return <>
     <RoomAudio member={member} />
     <CameraController onReady={onReady} />
-    <Lighting theme={theme} />
+    {/* Lara's completed museum layer already supplies its own art-directed
+        lighting. Mounting the generic rig as well created more than sixty
+        duplicate dynamic lights and was the primary room-entry bottleneck. */}
+    {theme.id !== 'lara' && <Lighting theme={theme} />}
     <RoomAtmosphere />
     <RoomLayout member={member} theme={theme} />
   </>;

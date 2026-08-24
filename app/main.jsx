@@ -12,8 +12,8 @@ import './section-atmospheres.css';
 
 const eraData = {
   default: {
-    label: 'LIVE MIX',
-    eyebrow: 'current signal / no era selected',
+    label: 'COMPLETE ARCHIVE',
+    eyebrow: 'current signal / complete archive',
     title: 'NOW',
     copy: 'The live KATSEYE archive. Trending drops, new visuals, and the next signal waiting to be discovered.',
     releases: ['TRENDING NOW', 'NEW MV', 'ON REPEAT', 'LATEST DROP', 'ARCHIVE'],
@@ -48,23 +48,67 @@ const eraData = {
   },
 };
 
+function EraTickerGroup({ label, hidden = false }) {
+  return <span className="boss-marquee-group" aria-hidden={hidden}>
+    {Array.from({ length: 12 }, (_, index) => <b key={index}>{label} •&nbsp;</b>)}
+  </span>;
+}
+
 function App() {
-  const [progress, setProgress] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
   const [era, setEra] = useState(null);
-  const [bossCursor, setBossCursor] = useState({ x: -100, y: -100, visible: false });
+  const [bossCursorVisible, setBossCursorVisible] = useState(false);
   const [activeMemberRoom, setActiveMemberRoom] = useState(null);
   const memberRoomScrollY = useRef(0);
+  const scrollProgress = useRef(null);
+  const bossCursor = useRef(null);
+  const scrollFrame = useRef(0);
+  const cursorFrame = useRef(0);
+  const cursorPosition = useRef({ x: -100, y: -100 });
+  const bossCursorVisibleRef = useRef(false);
+  const bossSectionRef = useRef(null);
+  const eraHintShown = useRef(false);
+  const [eraHintVisible, setEraHintVisible] = useState(false);
 
   useEffect(() => {
     const update = () => {
+      scrollFrame.current = 0;
       const max = document.documentElement.scrollHeight - window.innerHeight;
-      setProgress(max ? (window.scrollY / max) * 100 : 0);
-      setBossCursor((current) => current.visible ? { ...current, visible: false } : current);
+      scrollProgress.current?.style.setProperty('--scroll-progress', String(max ? window.scrollY / max : 0));
+      if (bossCursorVisibleRef.current) {
+        bossCursorVisibleRef.current = false;
+        setBossCursorVisible(false);
+      }
+    };
+    const onScroll = () => {
+      if (!scrollFrame.current) scrollFrame.current = window.requestAnimationFrame(update);
     };
     update();
-    window.addEventListener('scroll', update, { passive: true });
-    return () => window.removeEventListener('scroll', update);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.cancelAnimationFrame(scrollFrame.current);
+      window.removeEventListener('scroll', onScroll);
+    };
+  }, []);
+
+  useEffect(() => () => window.cancelAnimationFrame(cursorFrame.current), []);
+
+  useEffect(() => {
+    const section = bossSectionRef.current;
+    if (!section || !('IntersectionObserver' in window)) return undefined;
+    let dismissTimer = 0;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting || eraHintShown.current) return;
+      eraHintShown.current = true;
+      setEraHintVisible(true);
+      dismissTimer = window.setTimeout(() => setEraHintVisible(false), 3000);
+      observer.disconnect();
+    }, { threshold: .28 });
+    observer.observe(section);
+    return () => {
+      observer.disconnect();
+      window.clearTimeout(dismissTimer);
+    };
   }, []);
 
   useEffect(() => {
@@ -86,14 +130,36 @@ function App() {
     setEra(era === key ? null : key);
   };
 
+  const updateBossCursor = (event) => {
+    if (!era) return;
+    cursorPosition.current = { x: event.clientX, y: event.clientY };
+    if (!bossCursorVisibleRef.current) {
+      bossCursorVisibleRef.current = true;
+      setBossCursorVisible(true);
+    }
+    if (cursorFrame.current) return;
+    cursorFrame.current = window.requestAnimationFrame(() => {
+      cursorFrame.current = 0;
+      const { x, y } = cursorPosition.current;
+      bossCursor.current?.style.setProperty('left', `${x}px`);
+      bossCursor.current?.style.setProperty('top', `${y}px`);
+    });
+  };
+
   const currentEra = eraData[era || 'default'];
+  const eraTickerLabel = ({
+    default: 'ALL ERAS',
+    sis: 'SIS ERA',
+    chaos: 'BEAUTIFUL CHAOS',
+    wild: 'WILD',
+  })[era || 'default'];
   const cursorAsset = era === 'sis' ? '/cursor-flower.png' : era === 'chaos' ? '/cursor-knife.png' : era === 'wild' ? '/cursor-paw.png' : null;
 
   return <main>
     <GlobalMotion />
     <CinematicSectionTransitions />
     <div className="grain" aria-hidden="true" />
-    <div className="scroll-progress" style={{ transform: `scaleX(${progress / 100})` }} />
+    <div ref={scrollProgress} className="scroll-progress" />
     <header className="site-header">
       <a className="wordmark" href="#top" aria-label="Katseye home">KATSEYE<span>*</span></a>
       <p className="issue">a global story <i>01</i></p>
@@ -110,7 +176,7 @@ function App() {
 
     <HeroExperience />
 
-    <section className={`boss-section era-${era} ${era && bossCursor.visible ? 'has-era-cursor' : ''}`} id="boss" onMouseMove={(event) => era && setBossCursor({ x: event.clientX, y: event.clientY, visible: true })} onMouseLeave={() => setBossCursor((current) => ({ ...current, visible: false }))}>
+    <section ref={bossSectionRef} className={`boss-section era-${era} ${era && bossCursorVisible ? 'has-era-cursor' : ''}`} id="boss" onMouseMove={updateBossCursor} onMouseLeave={() => { bossCursorVisibleRef.current = false; setBossCursorVisible(false); }}>
       <div className="boss-noise" aria-hidden="true" />
       {currentEra.reference && <div className="era-collage" aria-hidden="true"><img src={currentEra.reference} alt="" /></div>}
       <div className="boss-scratch scratch-one" aria-hidden="true" /><div className="boss-scratch scratch-two" aria-hidden="true" />
@@ -119,6 +185,7 @@ function App() {
         <div className="era-switcher" aria-label="Select an era">
           <span className="era-label">ERA</span>
           {Object.entries(eraData).filter(([key]) => key !== 'default').map(([key, item]) => <button key={key} className={era === key ? 'is-active' : ''} onClick={() => selectEra(key)} aria-pressed={era === key}>{item.label}</button>)}
+          <span className={`era-explore-hint ${eraHintVisible ? 'is-visible' : ''}`} aria-hidden="true">Explore each Era <i>→</i></span>
         </div>
       </header>
 
@@ -135,8 +202,8 @@ function App() {
           
         </article>)}
       </div>
-      <div className="boss-marquee" aria-hidden="true"><span>{currentEra.label} * {currentEra.label} * {currentEra.label} * </span></div>
-      {cursorAsset && <div className={`era-cursor era-cursor-${era} ${bossCursor.visible ? 'is-visible' : ''}`} style={{ left: bossCursor.x, top: bossCursor.y }} aria-hidden="true"><img src={cursorAsset} alt="" /></div>}
+      <div className="boss-marquee" aria-hidden="true"><div className="boss-marquee-track"><EraTickerGroup label={eraTickerLabel} /><EraTickerGroup label={eraTickerLabel} hidden /></div></div>
+      {cursorAsset && <div ref={bossCursor} className={`era-cursor era-cursor-${era} ${bossCursorVisible ? 'is-visible' : ''}`} aria-hidden="true"><img src={cursorAsset} alt="" /></div>}
     </section>
 
     <JourneySection />

@@ -34,10 +34,10 @@ export default function GlobalMotion() {
     let pointerY = window.innerHeight * .5;
     let smoothX = pointerX;
     let smoothY = pointerY;
-    let scrollY = window.scrollY;
     let visible = !document.hidden;
+    let scrollFrame = 0;
 
-    const render = () => {
+    const renderCursor = () => {
       frame.current = 0;
       if (!visible) return;
 
@@ -45,24 +45,32 @@ export default function GlobalMotion() {
         smoothX += (pointerX - smoothX) * .085;
         smoothY += (pointerY - smoothY) * .085;
         cursor.current.style.transform = `translate3d(${smoothX}px, ${smoothY}px, 0) translate3d(-50%, -50%, 0)`;
+        if (Math.abs(pointerX - smoothX) > .25 || Math.abs(pointerY - smoothY) > .25) {
+          frame.current = window.requestAnimationFrame(renderCursor);
+        }
       }
-
-      const driftY = Math.sin(scrollY * .0012) * 14;
-      const driftX = Math.cos(scrollY * .0008) * 9;
-      root.style.setProperty('--global-drift-x', `${driftX.toFixed(2)}px`);
-      root.style.setProperty('--global-drift-y', `${driftY.toFixed(2)}px`);
-      frame.current = window.requestAnimationFrame(render);
     };
 
-    const start = () => {
-      if (!frame.current && visible) frame.current = window.requestAnimationFrame(render);
+    const updateScrollDrift = () => {
+      scrollFrame = 0;
+      const driftY = Math.sin(window.scrollY * .0012) * 14;
+      const driftX = Math.cos(window.scrollY * .0008) * 9;
+      root.style.setProperty('--global-drift-x', `${driftX.toFixed(2)}px`);
+      root.style.setProperty('--global-drift-y', `${driftY.toFixed(2)}px`);
+    };
+
+    const startCursor = () => {
+      if (!frame.current && visible && pointerQuery.matches) frame.current = window.requestAnimationFrame(renderCursor);
     };
     const onPointerMove = (event) => {
       pointerX = event.clientX;
       pointerY = event.clientY;
       cursor.current?.classList.add('is-active');
+      startCursor();
     };
-    const onScroll = () => { scrollY = window.scrollY; };
+    const onScroll = () => {
+      if (!scrollFrame) scrollFrame = window.requestAnimationFrame(updateScrollDrift);
+    };
     const onVisibility = () => {
       visible = !document.hidden;
       root.classList.toggle('global-motion-paused', !visible);
@@ -70,20 +78,21 @@ export default function GlobalMotion() {
         window.cancelAnimationFrame(frame.current);
         frame.current = 0;
       }
-      if (visible) start();
+      if (visible) updateScrollDrift();
     };
 
     root.classList.add('global-motion-enabled');
     window.addEventListener('pointermove', onPointerMove, { passive: true });
     window.addEventListener('scroll', onScroll, { passive: true });
     document.addEventListener('visibilitychange', onVisibility);
-    start();
+    updateScrollDrift();
 
     return () => {
       root.classList.remove('global-motion-enabled', 'global-motion-paused');
       root.style.removeProperty('--global-drift-x');
       root.style.removeProperty('--global-drift-y');
       window.cancelAnimationFrame(frame.current);
+      window.cancelAnimationFrame(scrollFrame);
       window.removeEventListener('pointermove', onPointerMove);
       window.removeEventListener('scroll', onScroll);
       document.removeEventListener('visibilitychange', onVisibility);

@@ -16,7 +16,16 @@ export default function PlayerControls({ onReady }) {
     velocity: new THREE.Vector3(),
     scrollTarget: ROOM.entranceZ - 1.15,
   });
-  const hasEntered = useRef(false);
+  // Looking around must be available as soon as the canvas mounts. The short
+  // entrance glide is visual only; it must never gate pointer input.
+  const hasEntered = useRef(true);
+  const hasReportedReady = useRef(false);
+
+  useEffect(() => {
+    if (hasReportedReady.current) return;
+    hasReportedReady.current = true;
+    onReady?.();
+  }, [onReady]);
 
   useEffect(() => {
     const canvas = gl.domElement;
@@ -63,7 +72,7 @@ export default function PlayerControls({ onReady }) {
     // Clamp after tab wakes / frame stalls so movement never jumps through a
     // display. Damping retains a tiny, deliberate camera inertia.
     const frameDelta = Math.min(delta, .05);
-    const entrance = clamp(state.clock.elapsedTime / 1.15, 0, 1);
+    const entrance = clamp(state.clock.elapsedTime / .32, 0, 1);
     const easedEntrance = entrance * entrance * (3 - 2 * entrance);
     const controls = view.current;
     controls.yaw = THREE.MathUtils.damp(controls.yaw, controls.targetYaw, 10, frameDelta);
@@ -75,11 +84,6 @@ export default function PlayerControls({ onReady }) {
     if (entrance < 1) {
       camera.position.set(0, ROOM.cameraHeight, THREE.MathUtils.lerp(ROOM.entranceZ + 1.4, ROOM.entranceZ - 1.15, easedEntrance));
       return;
-    }
-
-    if (!hasEntered.current) {
-      hasEntered.current = true;
-      onReady?.();
     }
 
     const forward = (input.current.has('KeyW') || input.current.has('ArrowUp') ? 1 : 0) - (input.current.has('KeyS') || input.current.has('ArrowDown') ? 1 : 0);

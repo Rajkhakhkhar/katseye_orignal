@@ -64,6 +64,15 @@ const memberMaterialProfiles = Object.freeze({
   }),
 });
 
+// These maps are architectural resources shared by the six galleries. Keeping
+// them alive for the page session avoids rebuilding CanvasTextures every time a
+// visitor exits and re-enters a room.
+const roomSurfaceCache = new Map();
+let cachedLaraSource = null;
+let laraSourcePromise = null;
+let cachedLaraFallbackMaps = null;
+let cachedLaraMaps = null;
+
 function configureTexture(texture, repeat, colorSpace = THREE.NoColorSpace, transform = {}) {
   texture.wrapS = transform.mirrored ? THREE.MirroredRepeatWrapping : THREE.RepeatWrapping;
   texture.wrapT = transform.mirrored ? THREE.MirroredRepeatWrapping : THREE.RepeatWrapping;
@@ -237,8 +246,70 @@ function createMemberSurface(kind, material) {
   };
 }
 
+function loadLaraTexture() {
+  if (cachedLaraSource) return Promise.resolve(cachedLaraSource);
+  if (laraSourcePromise) return laraSourcePromise;
+  laraSourcePromise = new Promise((resolve, reject) => {
+    new THREE.TextureLoader().load(laraCheetahBaseColor, (texture) => {
+      cachedLaraSource = texture;
+      resolve(texture);
+    }, undefined, reject);
+  });
+  return laraSourcePromise;
+}
+
+function getCachedLaraFallbackMaps() {
+  if (!cachedLaraFallbackMaps) {
+    cachedLaraFallbackMaps = {
+      floor: createRoomSurface('floor'),
+      ceiling: createRoomSurface('ceiling'),
+      sideWall: createRoomSurface('wall'),
+      backWall: createRoomSurface('wall'),
+    };
+  }
+  return cachedLaraFallbackMaps;
+}
+
+function getCachedLaraMaps(source) {
+  if (!cachedLaraMaps) {
+    cachedLaraMaps = {
+      floor: createLaraSurface(source, 'floor'),
+      ceiling: createLaraSurface(source, 'ceiling'),
+      sideWall: createLaraSurface(source, 'wall'),
+      backWall: createLaraSurface(source, 'backWall'),
+    };
+  }
+  return cachedLaraMaps;
+}
+
+function getCachedMemberMaps(surfacePreset) {
+  const profile = memberMaterialProfiles[surfacePreset];
+  if (!profile) return null;
+  if (!roomSurfaceCache.has(surfacePreset)) {
+    roomSurfaceCache.set(surfacePreset, {
+      floor: createMemberSurface('floor', profile.floor),
+      ceiling: createMemberSurface('ceiling', profile.ceiling),
+      sideWall: createMemberSurface('wall', profile.wall),
+      backWall: createMemberSurface('backWall', profile.backWall),
+    });
+  }
+  return roomSurfaceCache.get(surfacePreset);
+}
+
+export function preloadRoomMaterialAssets() {
+  if (typeof window === 'undefined') return;
+  const schedule = window.requestIdleCallback || ((callback) => window.setTimeout(callback, 80));
+  schedule(() => {
+    Object.keys(memberMaterialProfiles).forEach(getCachedMemberMaps);
+    getCachedLaraFallbackMaps();
+  });
+  loadLaraTexture().then((source) => schedule(() => getCachedLaraMaps(source))).catch(() => {
+    // The fallback maps already cover a temporary network miss.
+  });
+}
+
 function useLaraTexture(enabled) {
-  const [texture, setTexture] = useState(null);
+  const [texture, setTexture] = useState(() => (enabled ? cachedLaraSource : null));
 
   useEffect(() => {
     if (!enabled) {
@@ -247,14 +318,15 @@ function useLaraTexture(enabled) {
     }
 
     let active = true;
-    const loader = new THREE.TextureLoader();
-    const requested = loader.load(laraCheetahBaseColor, (loaded) => {
+    if (cachedLaraSource) setTexture(cachedLaraSource);
+    else loadLaraTexture().then((loaded) => {
       if (active) setTexture(loaded);
+    }).catch(() => {
+      if (active) setTexture(null);
     });
 
     return () => {
       active = false;
-      requested.dispose();
     };
   }, [enabled]);
 
@@ -272,43 +344,14 @@ export function useRoomSurfaceMaps(surfacePreset = 'base-neutral') {
   } : null), [hasMemberProfile, isLara]);
   // Lara needs a lightweight neutral material only while its fabric source is
   // decoding; themed rooms no longer build an unused neutral map set.
-  const laraFallbackMaps = useMemo(() => (isLara ? {
-    floor: createRoomSurface('floor'),
-    ceiling: createRoomSurface('ceiling'),
-    sideWall: createRoomSurface('wall'),
-    backWall: createRoomSurface('wall'),
-  } : null), [isLara]);
+  const laraFallbackMaps = useMemo(() => (isLara ? getCachedLaraFallbackMaps() : null), [isLara]);
   const laraSource = useLaraTexture(isLara);
-  const laraMaps = useMemo(() => (laraSource ? {
-    floor: createLaraSurface(laraSource, 'floor'),
-    ceiling: createLaraSurface(laraSource, 'ceiling'),
-    sideWall: createLaraSurface(laraSource, 'wall'),
-    backWall: createLaraSurface(laraSource, 'backWall'),
-  } : null), [laraSource]);
-  const memberMaps = useMemo(() => {
-    const profile = memberMaterialProfiles[surfacePreset];
-    if (!profile) return null;
-    return {
-      floor: createMemberSurface('floor', profile.floor),
-      ceiling: createMemberSurface('ceiling', profile.ceiling),
-      sideWall: createMemberSurface('wall', profile.wall),
-      backWall: createMemberSurface('backWall', profile.backWall),
-    };
-  }, [surfacePreset]);
+  const laraMaps = useMemo(() => (laraSource ? getCachedLaraMaps(laraSource) : null), [laraSource]);
+  const memberMaps = useMemo(() => getCachedMemberMaps(surfacePreset), [surfacePreset]);
 
   useEffect(() => () => {
     if (neutralMaps) disposeSurfaceMaps(neutralMaps);
   }, [neutralMaps]);
-  useEffect(() => () => {
-    if (laraFallbackMaps) disposeSurfaceMaps(laraFallbackMaps);
-  }, [laraFallbackMaps]);
-  useEffect(() => () => {
-    if (laraMaps) disposeSurfaceMaps(laraMaps);
-  }, [laraMaps]);
-  useEffect(() => () => {
-    if (memberMaps) disposeSurfaceMaps(memberMaps);
-  }, [memberMaps]);
-
   if (isLara) return laraMaps || laraFallbackMaps;
   return memberMaps || neutralMaps;
 }

@@ -30,7 +30,7 @@ export default function DoorExperience({ member, onExit }) {
 
   return <section className="door-experience" role="dialog" aria-modal="true" aria-label={`${member.name}'s interactive museum room`}>
     <RoomErrorBoundary fallback={<div className="door-experience-fallback">The room could not start. Please return to the doors and try again.</div>}>
-      <Canvas className="door-experience-canvas" camera={{ position: [0, ROOM.cameraHeight, ROOM.entranceZ + 1.4], fov: 60 }} dpr={[1, 1.5]} gl={{ antialias: true, powerPreference: 'high-performance' }} onCreated={({ gl }) => {
+      <Canvas className="door-experience-canvas" camera={{ position: [0, ROOM.cameraHeight, ROOM.entranceZ + 1.4], fov: 60 }} dpr={[1, 1.25]} gl={{ antialias: true, powerPreference: 'high-performance' }} onCreated={({ gl }) => {
         gl.toneMapping = THREE.ACESFilmicToneMapping;
         gl.toneMappingExposure = 1.12;
       }}>

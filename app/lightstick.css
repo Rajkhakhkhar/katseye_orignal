@@ -477,26 +477,38 @@
 @keyframes flow-slide { from { translate:-4vw 0; } to { translate:8vw 2vh; } }
 .lightstick-vignette { z-index: 4; background: radial-gradient(circle at 51% 49%, transparent 16%, rgba(63, 132, 153, .08) 60%, rgba(44, 93, 112, .23) 100%); }
 
-/* The future-universe entrance is deliberately a separate, immersive world. */
-.universe-hub { position:relative; min-height:175vh; overflow:clip; background:#080914; }
+/* The room selector is an exhibition of the six official charms. */
+.universe-hub { position:relative; min-height:175vh; overflow:clip; background:#100f18; }
 .universe-hub.door-handoff-pending { visibility:hidden; }
 .universe-hub.door-handoff-pending.is-door-ready { visibility:visible; }
 @media (prefers-reduced-motion: reduce) { .universe-hub.door-handoff-pending { visibility:visible; } }
 .universe-hub-stage {
   position:sticky; top:0; height:100vh; overflow:hidden; isolation:isolate;
-  background:radial-gradient(circle at 50% 37%, rgba(71,79,139,.18), transparent 36%), #080914;
+  background:
+    radial-gradient(ellipse at 50% 8%, rgba(220, 219, 240, .13), transparent 34%),
+    radial-gradient(circle at 8% 84%, rgba(75, 46, 91, .42), transparent 42%),
+    radial-gradient(circle at 93% 12%, rgba(72, 65, 98, .31), transparent 40%),
+    linear-gradient(132deg, #0d0e14 0%, #1b1723 42%, #201827 67%, #101116 100%);
 }
 .universe-hub-stage::before, .universe-hub-stage::after { content:''; position:absolute; inset:0; pointer-events:none; z-index:2; }
-.universe-hub-stage::before { opacity:.68; background:repeating-linear-gradient(90deg, rgba(237,242,255,.025) 0 1px, transparent 1px 12vw); mask-image:linear-gradient(to bottom, transparent, black 34%, transparent 100%); }
-.universe-hub-stage::after { background:radial-gradient(ellipse at center, transparent 25%, rgba(0,0,0,.56) 115%); }
+.universe-hub-stage::before { opacity:.58; background:linear-gradient(112deg, transparent 0 31%, rgba(236, 231, 255, .06) 31.05% 31.12%, transparent 31.2% 100%), linear-gradient(70deg, transparent 0 67%, rgba(236, 231, 255, .04) 67.05% 67.1%, transparent 67.16% 100%); }
+.universe-hub-stage::after { background:radial-gradient(ellipse at center, transparent 22%, rgba(5,5,9,.48) 112%); }
 .universe-hub-canvas { position:absolute !important; inset:0; z-index:1; width:100% !important; height:100% !important; }
-.universe-hub-intro { position:absolute; z-index:3; top:clamp(1.4rem,4.3vw,4rem); left:clamp(1.4rem,5vw,6.5rem); display:grid; gap:.7rem; color:#eff6ff; letter-spacing:.24em; font:600 clamp(.58rem,.75vw,.76rem)/1 sans-serif; pointer-events:none; }
-.universe-hub-intro i { display:block; width:clamp(4rem,8vw,9rem); height:1px; background:linear-gradient(90deg,#dff8ff,transparent); }
-.universe-name-reveal { position:absolute; z-index:3; left:50%; bottom:clamp(2rem,5vw,4.3rem); display:grid; justify-items:center; gap:.22rem; color:#f7faff; pointer-events:none; opacity:0; transform:translate(-50%,1rem); transition:opacity .42s ease,transform .42s cubic-bezier(.2,.8,.2,1); }
-.universe-name-reveal.is-visible { opacity:1; transform:translate(-50%,0); }
-.universe-name-reveal span { font:600 .58rem/1 sans-serif; letter-spacing:.19em; color:rgba(231,241,255,.66); white-space:nowrap; }
-.universe-name-reveal strong { font:400 clamp(1.8rem,4vw,4.6rem)/1.05 Georgia,serif; letter-spacing:-.045em; text-shadow:0 0 24px rgba(231,240,255,.34); }
-.universe-hub-note { position:absolute; z-index:3; right:clamp(1.4rem,5vw,6.5rem); bottom:clamp(1.7rem,4.3vw,4rem); color:rgba(225,240,255,.55); letter-spacing:.15em; font:500 clamp(.52rem,.65vw,.68rem)/1 sans-serif; writing-mode:vertical-rl; pointer-events:none; }
+.universe-hub-ribbons { position:absolute; z-index:0; inset:-22%; overflow:hidden; pointer-events:none; opacity:.72; }
+.universe-hub-ribbons i { position:absolute; display:block; width:140vw; height:34vh; border:1px solid rgba(224, 220, 244, .15); border-radius:50%; filter:blur(.1px); transform:rotate(var(--ribbon-angle)) scaleY(.35); animation:universe-ribbon-drift var(--ribbon-speed) ease-in-out infinite alternate; }
+.universe-hub-ribbons i:nth-child(1) { --ribbon-angle:-13deg; --ribbon-speed:23s; top:16%; left:-28vw; }
+.universe-hub-ribbons i:nth-child(2) { --ribbon-angle:11deg; --ribbon-speed:28s; top:46%; left:-12vw; opacity:.64; animation-delay:-11s; }
+.universe-hub-ribbons i:nth-child(3) { --ribbon-angle:-7deg; --ribbon-speed:25s; top:75%; left:-25vw; opacity:.4; animation-delay:-7s; }
+@keyframes universe-ribbon-drift { from { transform:translate3d(-3vw,-1vh,0) rotate(var(--ribbon-angle)) scaleY(.35); } to { transform:translate3d(7vw,3vh,0) rotate(var(--ribbon-angle)) scaleY(.35); } }
+.universe-symbol-labels { position:absolute; z-index:3; inset:0; pointer-events:none; color:#f7f3fb; font:600 clamp(.6rem,.82vw,.82rem)/1 sans-serif; letter-spacing:.2em; text-shadow:0 0 18px rgba(238, 229, 255, .36); }
+.universe-symbol-labels span { position:absolute; opacity:0; transform:translate(-50%, .55rem); transition:opacity .38s ease,transform .46s cubic-bezier(.2,.8,.2,1); }
+.universe-symbol-labels span.is-visible { opacity:1; transform:translate(-50%, 0); }
+.universe-symbol-labels span:nth-child(1) { left:27%; top:47%; }
+.universe-symbol-labels span:nth-child(2) { left:50%; top:49%; }
+.universe-symbol-labels span:nth-child(3) { left:73%; top:47%; }
+.universe-symbol-labels span:nth-child(4) { left:27%; top:81%; }
+.universe-symbol-labels span:nth-child(5) { left:50%; top:83%; }
+.universe-symbol-labels span:nth-child(6) { left:73%; top:81%; }
 .portal-teleport { position:absolute; z-index:6; inset:0; display:grid; place-items:center; cursor:pointer; background:radial-gradient(circle at center,color-mix(in srgb,var(--portal-color) 28%,transparent),rgba(8,9,20,.94) 47%,#080914 100%); animation:portal-arrival .85s cubic-bezier(.16,.84,.25,1) both; }
 .portal-teleport::before { content:''; position:absolute; width:min(70vw,55rem); aspect-ratio:1; border-radius:50%; border:1px solid color-mix(in srgb,var(--portal-color) 72%,white); box-shadow:0 0 100px color-mix(in srgb,var(--portal-color) 60%,transparent),inset 0 0 100px color-mix(in srgb,var(--portal-color) 25%,transparent); animation:portal-orbit 3s linear infinite; }
 .portal-teleport-core { position:relative; z-index:1; display:grid; justify-items:center; gap:.75rem; color:#fff; text-align:center; }
@@ -529,10 +541,12 @@
   .impact-card-gallery { inset: 7vh 0 42vh; }
   .impact-card { width: 11rem; }
   .universe-hub { min-height:145vh; }
-  .universe-hub-intro { top:1.4rem; left:1.3rem; }
-  .universe-hub-note { right:1.15rem; bottom:1.5rem; }
-  .universe-name-reveal { bottom:2rem; }
-  .universe-name-reveal strong { font-size:2rem; }
+  .universe-symbol-labels span:nth-child(1) { left:25%; top:37%; }
+  .universe-symbol-labels span:nth-child(2) { left:75%; top:37%; }
+  .universe-symbol-labels span:nth-child(3) { left:25%; top:59%; }
+  .universe-symbol-labels span:nth-child(4) { left:75%; top:59%; }
+  .universe-symbol-labels span:nth-child(5) { left:25%; top:81%; }
+  .universe-symbol-labels span:nth-child(6) { left:75%; top:81%; }
   .lara-universe-title { left:1.25rem; top:1.3rem; }
   .universe-return { top:1.35rem; right:1.25rem; }
   .lara-universe-title strong { font-size:1.55rem; }

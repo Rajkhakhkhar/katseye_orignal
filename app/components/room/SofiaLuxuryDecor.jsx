@@ -3,7 +3,7 @@ import { useLoader, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { ROOM } from './roomConfig';
 import MemberStoryProps from './MemberStoryProps';
-import monogramRug from '../../assets/room/sophia/sophia-ivory-monogram-rug.png';
+import monogramRug from '../../assets/room/sophia/sophia-ivory-monogram-rug.jpg';
 
 const IVORY = '#eee1c9';
 const IVORY_DEEP = '#d8c39c';
@@ -268,7 +268,6 @@ export default function SofiaLuxuryDecor() {
     {[-1, 1].map((side) => <SofiaHonoursCabinet key={`honours-${side}`} side={side} />)}
     {[-1, 1].map((side) => <SofiaPortraitConsole key={`console-${side}`} side={side} />)}
     {[-1, 1].map((side) => <SofiaPalm key={`palm-${side}`} side={side} />)}
-    <SofiaVintageMicrophone />
     <MemberStoryProps member="sophia" />
   </group>;
 }

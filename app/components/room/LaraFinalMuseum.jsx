@@ -3,7 +3,7 @@ import { useLoader } from '@react-three/fiber';
 import * as THREE from 'three';
 import { ROOM } from './roomConfig';
 import MemberStoryProps from './MemberStoryProps';
-import runnerTexture from '../../assets/room/lara/lara-bronze-cheetah-runner.png';
+import runnerTexture from '../../assets/room/lara/lara-bronze-cheetah-runner.jpg';
 
 const NERO = '#090b0d';
 const WALNUT = '#2c1c16';

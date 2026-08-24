@@ -2,7 +2,7 @@ import { useLoader, } from '@react-three/fiber';
 import * as THREE from 'three';
 import DanielaIdentityArchitecture from './DanielaIdentityArchitecture';
 import MemberStoryProps from './MemberStoryProps';
-import danceRunner from '../../assets/room/daniela/daniela-burgundy-dance-runner.png';
+import danceRunner from '../../assets/room/daniela/daniela-burgundy-dance-runner.jpg';
 
 const BRASS = '#bd9161';
 const WARM = '#ffe1ba';

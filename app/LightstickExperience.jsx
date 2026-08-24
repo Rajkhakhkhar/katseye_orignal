@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { preloadRoomAssets } from './components/room/roomAssetPreload';
 import './lightstick.css';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -23,12 +24,12 @@ const memberCards = [
 // universe. Later prompts can replace `destination: 'placeholder'` without
 // changing the hall, portal interactions, or the other members' worlds.
 const universePortals = [
-  { id: 'lara', name: 'Lara', symbol: 'key', color: '#bc78ff', destination: 'lara' },
-  { id: 'daniela', name: 'Daniela', symbol: 'shield', color: '#b495ff', destination: 'placeholder' },
-  { id: 'megan', name: 'Megan', symbol: 'cherry', color: '#ff708f', destination: 'placeholder' },
-  { id: 'yoonchae', name: 'Yoonchae', symbol: 'shell', color: '#8fbaff', destination: 'placeholder' },
-  { id: 'manon', name: 'Manon', symbol: 'tiara', color: '#ffd18a', destination: 'placeholder' },
-  { id: 'sophia', name: 'Sophia', symbol: 'anchor', color: '#66e2d4', destination: 'placeholder' },
+  { id: 'lara', name: 'Lara', symbol: 'key', color: '#e7edf7', destination: 'lara' },
+  { id: 'daniela', name: 'Daniela', symbol: 'shield', color: '#e7edf7', destination: 'placeholder' },
+  { id: 'megan', name: 'Megan', symbol: 'cherry', color: '#e7edf7', destination: 'placeholder' },
+  { id: 'yoonchae', name: 'Yoonchae', symbol: 'shell', color: '#e7edf7', destination: 'placeholder' },
+  { id: 'manon', name: 'Manon', symbol: 'tiara', color: '#e7edf7', destination: 'placeholder' },
+  { id: 'sophia', name: 'Sophia', symbol: 'anchor', color: '#e7edf7', destination: 'placeholder' },
 ];
 
 function CrackLines({ visible }) {
@@ -98,25 +99,8 @@ function FluidField() {
   </mesh>)}</group>;
 }
 
-function PortalDust() {
-  const ref = useRef();
-  const positions = useMemo(() => {
-    const values = [];
-    for (let index = 0; index < 180; index += 1) {
-      values.push(((index * 19) % 31 - 15) * 0.38, ((index * 43) % 27 - 13) * 0.28, -4 - (index % 9) * 0.32);
-    }
-    return new Float32Array(values);
-  }, []);
-  useFrame((state) => {
-    if (!ref.current) return;
-    ref.current.rotation.y = state.clock.elapsedTime * 0.018;
-    ref.current.position.y = Math.sin(state.clock.elapsedTime * 0.18) * 0.08;
-  });
-  return <points ref={ref}><bufferGeometry><bufferAttribute attach="attributes-position" args={[positions, 3]} /></bufferGeometry><pointsMaterial color="#eefaff" transparent opacity={0.72} size={0.028} sizeAttenuation depthWrite={false} /></points>;
-}
-
-function PortalSymbol({ symbol, color, active }) {
-  const material = <meshStandardMaterial color={color} emissive={color} emissiveIntensity={active ? 1.8 : 0.52} metalness={0.76} roughness={0.18} />;
+function PortalSymbol({ symbol, active }) {
+  const material = <meshPhysicalMaterial color="#eef2f8" emissive="#aeb8ca" emissiveIntensity={active ? .72 : .14} metalness={.96} roughness={.1} clearcoat={1} clearcoatRoughness={.04} envMapIntensity={2.1} />;
   if (symbol === 'shield') return <group scale={[0.72, 0.9, 0.3]}><mesh><octahedronGeometry args={[0.56, 0]} />{material}</mesh><mesh position={[0, 0.04, 0.45]} scale={[0.36, 0.36, 0.12]}><octahedronGeometry args={[0.42, 0]} />{material}</mesh></group>;
   if (symbol === 'key') return <group rotation={[0, 0, -0.36]}><mesh position={[0, 0.3, 0]}><torusGeometry args={[0.24, 0.055, 10, 28]} />{material}</mesh><mesh position={[0, -0.18, 0]} scale={[0.11, 0.62, 0.11]}><boxGeometry args={[1, 1, 1]} />{material}</mesh><mesh position={[0.22, -0.52, 0]} scale={[0.34, 0.11, 0.11]}><boxGeometry args={[1, 1, 1]} />{material}</mesh></group>;
   if (symbol === 'tiara') return <group position={[0, -0.12, 0]}>{[-0.34, 0, 0.34].map((x, index) => <mesh key={x} position={[x, index === 1 ? 0.28 : 0.06, 0]} scale={[0.17, index === 1 ? 0.62 : 0.42, 0.12]}><coneGeometry args={[1, 1, 5]} />{material}</mesh>)}<mesh position={[0, -0.28, 0]} scale={[0.7, 0.13, 0.12]}><torusGeometry args={[1, 0.34, 8, 32, Math.PI]} />{material}</mesh></group>;
@@ -128,25 +112,29 @@ function PortalSymbol({ symbol, color, active }) {
 function UniversePortal({ portal, position, active, onHover, onLeave, onSelect }) {
   const group = useRef();
   const inner = useRef();
-  useFrame((state) => {
+  const glow = useRef();
+  useFrame((state, delta) => {
     if (!group.current) return;
     const time = state.clock.elapsedTime;
     group.current.position.y = position[1] + Math.sin(time * 0.64 + position[0]) * 0.07;
-    group.current.scale.setScalar(active ? 1.09 : 1);
-    if (inner.current) inner.current.rotation.z = time * (active ? 0.18 : 0.055);
+    const targetScale = active ? 1.08 : 1;
+    group.current.scale.setScalar(THREE.MathUtils.damp(group.current.scale.x, targetScale, 10, delta));
+    if (inner.current) inner.current.rotation.z = time * (active ? .12 : .045);
+    if (glow.current) glow.current.intensity = THREE.MathUtils.damp(glow.current.intensity, active ? 3.4 : .85, 10, delta);
   });
   return <group ref={group} position={position}>
-    <pointLight color={portal.color} intensity={active ? 4.2 : 1.25} distance={5.2} />
-    <mesh rotation={[0, 0, 0]} scale={[1, 1.28, 1]}>
-      <torusGeometry args={[1.04, active ? 0.1 : 0.073, 14, 64]} />
-      <meshStandardMaterial color={portal.color} emissive={portal.color} emissiveIntensity={active ? 1.55 : 0.46} metalness={0.84} roughness={0.18} />
-    </mesh>
-    <mesh rotation={[0, 0, 0]} scale={[0.93, 1.2, 1]} onPointerOver={(event) => { event.stopPropagation(); onHover(portal.id); }} onPointerOut={onLeave} onClick={(event) => { event.stopPropagation(); onSelect(portal); }}>
-      <circleGeometry args={[1, 48]} />
-      <meshPhysicalMaterial color={portal.color} transparent opacity={active ? 0.34 : 0.15} transmission={0.3} roughness={0.16} side={THREE.DoubleSide} depthWrite={false} />
-    </mesh>
-    <group ref={inner} position={[0, 0, 0.1]}><PortalSymbol symbol={portal.symbol} color={portal.color} active={active} /></group>
-    <mesh position={[0, -1.5, -0.3]} scale={[0.86, 0.12, 0.45]} rotation={[0, 0, 0]}><boxGeometry args={[1, 1, 1]} /><meshStandardMaterial color="#10131f" metalness={0.88} roughness={0.25} /></mesh>
+    <pointLight ref={glow} color="#ffffff" intensity={.85} distance={4.7} />
+    <group onPointerOver={(event) => { event.stopPropagation(); onHover(portal.id); }} onPointerOut={onLeave} onClick={(event) => { event.stopPropagation(); onSelect(portal); }}>
+      <mesh scale={[1, 1.28, 1]}>
+        <torusGeometry args={[1.04, active ? .1 : .073, 14, 64]} />
+        <meshPhysicalMaterial color="#edf2f9" emissive="#b9c4d8" emissiveIntensity={active ? .58 : .1} metalness={.96} roughness={.11} clearcoat={1} clearcoatRoughness={.04} envMapIntensity={2.15} />
+      </mesh>
+      <mesh scale={[.93, 1.2, 1]}>
+        <circleGeometry args={[1, 48]} />
+        <meshPhysicalMaterial color="#d9e1ee" transparent opacity={active ? .21 : .09} transmission={.18} roughness={.12} side={THREE.DoubleSide} depthWrite={false} />
+      </mesh>
+      <group ref={inner} position={[0, 0, .1]}><PortalSymbol symbol={portal.symbol} active={active} /></group>
+    </group>
   </group>;
 }
 
@@ -157,29 +145,32 @@ function PortalHall({ hovered, setHovered, onSelect }) {
     ? [[-1.5, 2.35, 0], [1.5, 2.35, 0], [-1.5, 0, 0], [1.5, 0, 0], [-1.5, -2.35, 0], [1.5, -2.35, 0]]
     : [[-4.1, 1.65, 0], [0, 1.82, 0], [4.1, 1.65, 0], [-4.1, -1.65, 0], [0, -1.82, 0], [4.1, -1.65, 0]];
   return <>
-    <PortalDust />
-    <ambientLight intensity={0.42} /><directionalLight position={[2, 6, 6]} color="#dbeaff" intensity={1.65} />
-    <mesh position={[0, -3.85, -1]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow><planeGeometry args={[24, 20]} /><meshStandardMaterial color="#080914" metalness={0.7} roughness={0.23} /></mesh>
-    <mesh position={[0, 0, -5]}><planeGeometry args={[26, 16]} /><meshBasicMaterial color="#090a16" /></mesh>
+    <ambientLight intensity={.42} /><directionalLight position={[2.8, 5.2, 5]} color="#ffffff" intensity={1.7} /><pointLight position={[-4, 1.8, 4]} color="#dce8ff" intensity={.85} distance={10} /><pointLight position={[4, -1.5, 3]} color="#ffffff" intensity={.72} distance={9} />
     {universePortals.map((portal, index) => <UniversePortal key={portal.id} portal={portal} position={positions[index]} active={hovered === portal.id} onHover={setHovered} onLeave={() => setHovered(null)} onSelect={onSelect} />)}
   </>;
 }
 
 function UniverseHub({ onMemberSelect, sectionRef }) {
   const [hovered, setHovered] = useState(null);
-  const active = universePortals.find((portal) => portal.id === hovered);
+  useEffect(() => {
+    // All six rooms are part of the same experience. Warm their code, gallery
+    // textures, and shared material maps while visitors explore the earlier
+    // chapters instead of starting that work at the doorway.
+    const schedule = window.requestIdleCallback || ((callback) => window.setTimeout(callback, 120));
+    const cancel = window.cancelIdleCallback || window.clearTimeout;
+    const task = schedule(() => preloadRoomAssets(), { timeout: 1200 });
+    return () => cancel(task);
+  }, []);
   const enterPortal = (portal) => {
     onMemberSelect?.(portal);
   };
   return <section ref={sectionRef} className="afterglow-section universe-hub door-handoff-pending" aria-label="Entrance to the six Katseye universes">
     <div className="universe-hub-stage">
       <Canvas className="universe-hub-canvas" camera={{ position: [0, 0, 12.5], fov: 45 }} dpr={[1, 1.75]} shadows gl={{ antialias: true }}>
-        <color attach="background" args={['#080914']} /><fog attach="fog" args={['#080914', 8, 19]} />
-        <PortalHall hovered={hovered} setHovered={setHovered} onSelect={enterPortal} />
+        <PortalHall hovered={hovered} setHovered={(id) => { preloadRoomAssets(); setHovered(id); }} onSelect={enterPortal} />
       </Canvas>
-      <div className="universe-hub-intro" aria-hidden="true"><span>THE SIX WORLDS</span><i /></div>
-      <div className={`universe-name-reveal ${active ? 'is-visible' : ''}`} aria-live="polite"><span>UNIVERSE / {active ? active.id.toUpperCase() : '—'}</span><strong>{active?.name || ' '}</strong></div>
-      <div className="universe-hub-note" aria-hidden="true">APPROACH A GATEWAY</div>
+      <div className="universe-hub-ribbons" aria-hidden="true"><i /><i /><i /></div>
+      <div className="universe-symbol-labels" aria-live="polite">{universePortals.map((portal, index) => <span className={hovered === portal.id ? 'is-visible' : ''} style={{ '--symbol-slot': index }} key={portal.id}>{portal.name.toUpperCase()}</span>)}</div>
     </div>
   </section>;
 }

@@ -1,0 +1,95 @@
+/* Scroll experience layer: preserves the existing archive content and layout. */
+#journey .journey-v3-card {
+  min-height: clamp(440px, 62svh, 650px);
+  will-change: transform, opacity;
+  transition:
+    opacity .78s cubic-bezier(.22,.76,.22,1),
+    transform .78s cubic-bezier(.22,.76,.22,1),
+    border-color .42s ease,
+    box-shadow .42s ease,
+    filter .42s ease;
+}
+
+#journey .journey-v3-flow {
+  --journey-focus-x: 0;
+  transition: transform .86s cubic-bezier(.22,.76,.22,1);
+  transform: translate3d(calc(var(--journey-focus-x) * -10px),0,0);
+  will-change: transform;
+}
+#journey .journey-v3-row { min-height: clamp(620px,86svh,960px); }
+#journey .journey-v3-row-left .journey-v3-card { transform: translate3d(-50px,26px,0) scale(.986); }
+#journey .journey-v3-row-right .journey-v3-card { transform: translate3d(50px,26px,0) scale(.986); }
+#journey .journey-v3-card.is-visible { transform: translate3d(0,0,0) scale(1); }
+#journey .journey-v3-card.is-visible.is-muted { opacity: .58; filter: saturate(.8) brightness(.84); }
+#journey .journey-v3-card.is-visible.is-past { opacity: .35; filter: saturate(.68) brightness(.74); }
+#journey .journey-v3-card.is-visible.is-current {
+  opacity: 1;
+  filter: saturate(1.04) brightness(1.045);
+  transform: translate3d(0,-4px,0) scale(1.028);
+  border-color: rgba(181,238,223,.55);
+  box-shadow: 0 26px 58px rgba(1,12,18,.38), inset 0 1px 0 rgba(237,255,250,.16);
+  z-index: 2;
+}
+
+#journey .journey-v3-card.is-visible.is-current .journey-v3-image > img { filter: brightness(1.06) saturate(1.04); }
+#journey .journey-v3-image,
+#journey .journey-v3-copy,
+#journey .journey-v3-copy > p,
+#journey .journey-v3-copy h4,
+#journey .journey-v3-copy > div { will-change: transform, opacity; }
+#journey .journey-v3-card .journey-v3-image { opacity: 0; transform: translate3d(0,12px,0) rotate(var(--journey-image-tilt,2.5deg)) scale(.95); transition: opacity .74s cubic-bezier(.22,.76,.22,1), transform .8s cubic-bezier(.22,.76,.22,1); }
+#journey .journey-v3-row-left .journey-v3-image { --journey-image-tilt: -2.5deg; }
+#journey .journey-v3-card.is-visible .journey-v3-image { opacity: 1; transform: translate3d(0,0,0) rotate(0) scale(1); }
+#journey .journey-v3-card .journey-v3-copy { opacity: 0; transform: translate3d(0,20px,0); transition: opacity .72s cubic-bezier(.22,.76,.22,1) .12s, transform .72s cubic-bezier(.22,.76,.22,1) .12s; }
+#journey .journey-v3-card.is-visible .journey-v3-copy { opacity: 1; transform: translate3d(0,0,0); }
+#journey .journey-v3-card .journey-v3-copy > p,
+#journey .journey-v3-card .journey-v3-copy h4,
+#journey .journey-v3-card .journey-v3-copy > div { opacity: 0; transform: translate3d(0,12px,0); transition: opacity .58s cubic-bezier(.22,.76,.22,1), transform .58s cubic-bezier(.22,.76,.22,1); }
+#journey .journey-v3-card.is-visible .journey-v3-copy > p { opacity: 1; transform: none; transition-delay: .2s; }
+#journey .journey-v3-card.is-visible .journey-v3-copy h4 { opacity: 1; transform: none; transition-delay: .31s; }
+#journey .journey-v3-card.is-visible .journey-v3-copy > div { opacity: 1; transform: none; transition-delay: .43s; }
+#journey .journey-v3-node { transition: transform .46s cubic-bezier(.22,.76,.22,1), box-shadow .46s ease, border-color .46s ease, opacity .46s ease; }
+#journey .journey-v3-node:not(.is-active) { opacity: .45; }
+#journey .journey-v3-node.is-active { opacity: 1; border-color: rgba(195,241,147,.95); box-shadow: 0 0 0 4px rgba(111,213,212,.09), 0 0 19px rgba(111,213,212,.35); }
+#journey .journey-v3-node.is-current { transform: scale(1.27); border-color: #d5ffad; box-shadow: 0 0 0 7px rgba(183,227,109,.12), 0 0 29px rgba(111,213,212,.58); }
+#journey .journey-v3-node.is-past { opacity: .68; box-shadow: 0 0 0 4px rgba(111,213,212,.07), 0 0 15px rgba(111,213,212,.24); }
+#journey .journey-v3-path-progress { transition: stroke-dashoffset .12s linear; }
+
+@supports (animation-timeline: view()) {
+  #journey .journey-v3-image:not(.is-rotated-media) > img {
+    animation: journey-media-depth linear both;
+    animation-timeline: view();
+    animation-range: entry 0% exit 100%;
+    will-change: transform;
+  }
+}
+
+@keyframes journey-media-depth {
+  from { transform: translate3d(0,-5px,0) scale(1.006); }
+  to { transform: translate3d(0,5px,0) scale(1.006); }
+}
+
+@media (max-width:720px) {
+  #journey .journey-v3-flow { transform: none; }
+  #journey .journey-v3-row { min-height: min(82svh,720px); }
+  #journey .journey-v3-card { min-height: 0; }
+  #journey .journey-v3-card.is-visible.is-current { transform: translate3d(0,-2px,0) scale(1.008); }
+  #journey .journey-v3-card.is-visible.is-muted { opacity: .78; filter: saturate(.9) brightness(.94); }
+  #journey .journey-v3-card.is-visible.is-past { opacity: .5; filter: saturate(.78) brightness(.82); }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  #journey .journey-v3-card,
+  #journey .journey-v3-card.is-visible,
+  #journey .journey-v3-card.is-visible.is-current,
+  #journey .journey-v3-card.is-visible.is-muted,
+  #journey .journey-v3-card.is-visible.is-past,
+  #journey .journey-v3-node,
+  #journey .journey-v3-node.is-current,
+  #journey .journey-v3-flow,
+  #journey .journey-v3-image,
+  #journey .journey-v3-copy,
+  #journey .journey-v3-copy > p,
+  #journey .journey-v3-copy h4,
+  #journey .journey-v3-copy > div { opacity: 1; transform: none; filter: none; transition: none; animation: none; }
+}

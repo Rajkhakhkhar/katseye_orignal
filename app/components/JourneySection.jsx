@@ -4,14 +4,16 @@ import './JourneyMedia.css';
 import './JourneyPolish.css';
 import './JourneyArchiveTransition.css';
 import './JourneyLayoutFix.css';
+import './JourneyExperience.css';
 import memoryAssets from 'virtual:memory-assets';
 
 const groups = [
   { year: '2023', milestones: [
     ['Dream Academy begins', 'Dream Academy', ['20 contestants compete for six debut positions.', 'A global girl group starts to take shape.']],
     ['Final Live', 'Final Live', ['The final stage brings every possibility into focus.', 'One announcement changes everything.']],
-    ['Reveal all six members', 'Final Selection', ['Six individual stories become one shared future.', 'KATSEYE is formed.'], 'members'],
+    ['KATSEYE is formed ', 'Final Selection', ['Six individual stories become one shared future.', 'KATSEYE is formed.'], 'members'],
   ] },
+
   { year: '2024', milestones: [
     ['Debut', 'Debut', ['The beginning of KATSEYE.', 'A new global group steps into the world.']],
     ['Touch', 'Touch', ['A viral dance moment travels worldwide.', 'KATSEYE finds its first shared rhythm.']],
@@ -21,6 +23,7 @@ const groups = [
     ['Megan Injury', 'Megan Injury', ['An unexpected pause tests the group.', 'The story keeps moving together.']],
     ['Flame Collaboration', 'Flame Collaboration', ['A new collaboration carries the momentum forward.', 'Another page turns.']],
   ] },
+
   { year: '2025', milestones: [
     ['Wango Tango', 'Wango Tango', ['A major stage marks the next step.', 'The audience gets bigger.']],
     ['Gnarly', 'Gnarly', ['A new sound starts a new conversation.', 'KATSEYE pushes forward.']],
@@ -33,6 +36,7 @@ const groups = [
     ['Sold Out Shows', 'Sold Out Shows', ['More dates sell out as the tour grows.', 'The connection gets louder.']],
     ['Grammy Nominations', 'Grammy Nominations', ['A major recognition milestone arrives.', 'The story enters a new room.']],
   ] },
+
   { year: '2026', milestones: [
     ['Internet Girl', 'Internet Girl', ['A new era begins with a new point of view.', 'The next evolution is here.']],
     ['Manon Hiatus', 'Manon Hiatus', ['The group moves through another pause together.', 'The journey holds space for every chapter.']],
@@ -54,7 +58,7 @@ const groups = [
 const memoryAssetFolders = {
   'Dream Academy begins': 'dream-academy',
   'Final Live': 'final-lineup',
-  'Reveal all six members': 'katseye-formed',
+  'KATSEYE is formed ': 'katseye-formed',
   'Debut': 'debut',
   'Touch': 'touch',
   'SIS EP': 'sis',
@@ -87,7 +91,6 @@ const memoryAssetFolders = {
   'WILDWORLD Tour': 'wildworld-tour',
   'Sold Out within 48 Hours': 'sold-out-shows',
 };
-
 const milestones = groups.flatMap((group) => group.milestones.map(([title, image, lines, type]) => ({
   year: group.year,
   title,
@@ -128,6 +131,8 @@ function JourneyMedia({ milestone, src }) {
 export default function JourneySection() {
   const sectionRef = useRef();
   const [visibleCards, setVisibleCards] = useState(() => new Set());
+  const activeCardRef = useRef(-1);
+  const [activeCard, setActiveCard] = useState(0);
   const [archiveEntered, setArchiveEntered] = useState(false);
 
   useEffect(() => {
@@ -182,6 +187,24 @@ export default function JourneySection() {
 
   useEffect(() => {
     const cards = sectionRef.current?.querySelectorAll('[data-journey-card]');
+    if (!cards || !('IntersectionObserver' in window)) return undefined;
+    const observer = new IntersectionObserver((entries) => {
+      const closest = entries
+        .filter((entry) => entry.isIntersecting)
+        .sort((a, b) => Math.abs(a.boundingClientRect.top + a.boundingClientRect.height / 2 - window.innerHeight / 2) - Math.abs(b.boundingClientRect.top + b.boundingClientRect.height / 2 - window.innerHeight / 2))[0];
+      if (!closest) return;
+      const index = Number(closest.target.dataset.journeyCard);
+      if (index === activeCardRef.current) return;
+      activeCardRef.current = index;
+      setActiveCard(index);
+      sectionRef.current?.style.setProperty('--journey-focus-x', index % 2 === 0 ? '1' : '-1');
+    }, { rootMargin: '-43% 0px -43% 0px', threshold: 0 });
+    cards.forEach((card) => observer.observe(card));
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const cards = sectionRef.current?.querySelectorAll('[data-journey-card]');
     if (!cards || !('IntersectionObserver' in window)) {
       setVisibleCards(new Set(milestones.map((_, index) => index)));
       return undefined;
@@ -200,15 +223,17 @@ export default function JourneySection() {
       <svg className="journey-v3-path" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path className="journey-v3-path-base" d="M50 0 C50 5 44 8 50 12 S56 19 50 24 S44 31 50 36 S56 43 50 48 S44 55 50 60 S56 67 50 72 S44 79 50 84 S56 91 50 100" pathLength="1" /><path className="journey-v3-path-progress" d="M50 0 C50 5 44 8 50 12 S56 19 50 24 S44 31 50 36 S56 43 50 48 S44 55 50 60 S56 67 50 72 S44 79 50 84 S56 91 50 100" pathLength="1" /></svg>
       {milestones.map((milestone, index) => {
         const previous = milestones[index - 1];
-        const side = index % 2 ? 'right' : 'left';
+        const side = index % 2 ? 'left' : 'right';
         const active = visibleCards.has(index);
+        const current = activeCard === index;
+        const past = active && index < activeCard;
         const memoryAsset = milestone.assetFolder && resolveMemoryAsset(milestone.assetFolder);
         const presentation = mediaPresentation[milestone.title];
         return <div key={milestone.title}>
           {(!previous || previous.year !== milestone.year) && <div className="journey-v3-year"><span>{milestone.year}</span></div>}
           <article className={`journey-v3-row journey-v3-row-${side}`}>
-            <i className={`journey-v3-node ${active ? 'is-active' : ''}`} style={{ '--node-entry-delay': `${Math.min(index, 5) * 150}ms` }} aria-hidden="true" />
-            <div className={`journey-v3-card ${active ? 'is-visible' : ''} ${index === 0 ? 'is-first-card' : ''}`} data-journey-card={index}>
+            <i className={`journey-v3-node ${active ? 'is-active' : ''} ${current ? 'is-current' : ''} ${past ? 'is-past' : ''}`} style={{ '--node-entry-delay': `${Math.min(index, 5) * 150}ms` }} aria-hidden="true" />
+            <div className={`journey-v3-card ${active ? 'is-visible' : ''} ${current ? 'is-current' : 'is-muted'} ${past ? 'is-past' : ''} ${index === 0 ? 'is-first-card' : ''}`} data-journey-card={index}>
               <div className={`journey-v3-image ${memoryAsset ? 'has-image' : ''} ${presentation?.className || ''}`}><JourneyMedia milestone={milestone} src={memoryAsset} /></div>
               <div className="journey-v3-copy"><p>{milestone.year}</p><h4><TypedText text={milestone.title} active={active} speed={16} /></h4>{milestone.lines.map((line) => <div key={line}><TypedText text={line} active={active} speed={8} /></div>)}</div>
               {milestone.type === 'members' && <div className={`journey-v3-members ${active ? 'is-visible' : ''}`}>{members.map((member, memberIndex) => <span key={member} style={{ '--member-delay': `${memberIndex * .7}s` }}>✓ {member}</span>)}<strong>KATSEYE IS FORMED</strong></div>}

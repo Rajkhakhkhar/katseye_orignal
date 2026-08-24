@@ -1,7 +1,7 @@
 /* Image and copy containment only — the alternating journey composition stays intact. */
 #journey .journey-v3-card{grid-template-columns:minmax(0,48%) minmax(0,52%);min-height:clamp(320px,29vw,390px);align-items:stretch}
 #journey .journey-v3-image{min-width:0;min-height:0;height:100%;aspect-ratio:auto;display:grid;place-items:center}
-#journey .journey-v3-image>img{width:100%;height:100%;object-fit:contain!important;object-position:var(--journey-image-position,center)!important;transform:none!important}
+#journey .journey-v3-image>img{width:100%;height:100%;object-fit:contain!important;object-position:var(--journey-image-position,center)!important}
 /* This source was supplied sideways at the pixel level, not through EXIF. */
 #journey .journey-v3-image.is-rotated-media>img{transform:rotate(-90deg)!important}
 #journey .journey-v3-copy{min-width:0;display:grid;align-content:center;gap:0;padding:clamp(25px,3.6vw,46px)}
