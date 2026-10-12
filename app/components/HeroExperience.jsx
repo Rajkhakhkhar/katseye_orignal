@@ -1,5 +1,5 @@
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import './HeroExperience.css';
@@ -7,29 +7,37 @@ import './HeroExperience.css';
 const clamp = (value) => Math.max(0, Math.min(1, value));
 const damp = (speed, delta) => 1 - Math.exp(-speed * delta);
 
-function useHeroProgress(containerRef, progressRef) {
+function useHeroProgress(containerRef, progressRef, setCanvasActive) {
   useEffect(() => {
     let active = true;
+    let frame = 0;
     const update = () => {
+      frame = 0;
       if (!active) return;
       const element = containerRef.current;
       if (!element) return;
       progressRef.current = clamp(-element.getBoundingClientRect().top / Math.max(1, element.offsetHeight - window.innerHeight));
     };
+    const requestUpdate = () => {
+      if (!active || frame) return;
+      frame = window.requestAnimationFrame(update);
+    };
     const observer = new IntersectionObserver(([entry]) => {
       active = entry.isIntersecting;
-      if (active) update();
+      setCanvasActive(active);
+      if (active) requestUpdate();
     }, { rootMargin: '160px 0px' });
     if (containerRef.current) observer.observe(containerRef.current);
-    update();
-    window.addEventListener('scroll', update, { passive: true });
-    window.addEventListener('resize', update);
+    requestUpdate();
+    window.addEventListener('scroll', requestUpdate, { passive: true });
+    window.addEventListener('resize', requestUpdate);
     return () => {
       observer.disconnect();
-      window.removeEventListener('scroll', update);
-      window.removeEventListener('resize', update);
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener('scroll', requestUpdate);
+      window.removeEventListener('resize', requestUpdate);
     };
-  }, [containerRef, progressRef]);
+  }, [containerRef, progressRef, setCanvasActive]);
 }
 
 function createMarkStar() {
@@ -164,7 +172,8 @@ export default function HeroExperience() {
   const container = useRef();
   const pointerRef = useRef({ x: 0, y: 0, proximity: 0 });
   const progressRef = useRef(0);
-  useHeroProgress(container, progressRef);
+  const [canvasActive, setCanvasActive] = useState(true);
+  useHeroProgress(container, progressRef, setCanvasActive);
   return <section className="hero-r3f hero-logo-orbit" ref={container} id="top" aria-label="KATSEYE sculpted logo" onPointerMove={(event) => {
     if (event.pointerType === 'touch') return;
     const bounds = event.currentTarget.getBoundingClientRect();
@@ -176,7 +185,7 @@ export default function HeroExperience() {
     <div className="hero-r3f-pin hero-logo-orbit-pin">
       <div className="hero-logo-orbit-atmosphere" aria-hidden="true"><i /><i /></div>
       <div className="hero-logo-orbit-threads" aria-hidden="true"><i /><i /><i /></div>
-      <Canvas className="hero-r3f-canvas" camera={{ position: [0, 0, 7.3], fov: 36 }} dpr={[1, 1.5]} gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }} onCreated={({ gl }) => { gl.toneMapping = THREE.ACESFilmicToneMapping; gl.toneMappingExposure = 1.1; }}><HeroWorld pointerRef={pointerRef} progressRef={progressRef} /></Canvas>
+      <Canvas frameloop={canvasActive ? 'always' : 'never'} className="hero-r3f-canvas" camera={{ position: [0, 0, 7.3], fov: 36 }} dpr={[1, 1.5]} gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }} onCreated={({ gl }) => { gl.toneMapping = THREE.ACESFilmicToneMapping; gl.toneMappingExposure = 1.1; }}><HeroWorld pointerRef={pointerRef} progressRef={progressRef} /></Canvas>
     </div>
   </section>;
 }

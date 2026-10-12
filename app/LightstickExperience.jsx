@@ -11,6 +11,23 @@ gsap.registerPlugin(ScrollTrigger);
 
 const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
 
+// The existing scenes keep their visuals, but only consume continuous WebGL
+// frames while their section is close enough to be seen.
+function useCanvasActivity(sectionRef) {
+  const [active, setActive] = useState(false);
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section || !('IntersectionObserver' in window)) {
+      setActive(true);
+      return undefined;
+    }
+    const observer = new IntersectionObserver(([entry]) => setActive(entry.isIntersecting), { rootMargin: '180px 0px' });
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, [sectionRef]);
+  return active;
+}
+
 const memberCards = [
   ['Yoonchae', 'Soothing Shell', '/charm-card-backs/yoonchae.png'],
   ['Sophia', 'Dream Anchor', '/charm-card-backs/sophia.png'],
@@ -152,6 +169,7 @@ function PortalHall({ hovered, setHovered, onSelect }) {
 
 function UniverseHub({ onMemberSelect, sectionRef }) {
   const [hovered, setHovered] = useState(null);
+  const canvasActive = useCanvasActivity(sectionRef);
   useEffect(() => {
     // All six rooms are part of the same experience. Warm their code, gallery
     // textures, and shared material maps while visitors explore the earlier
@@ -166,7 +184,7 @@ function UniverseHub({ onMemberSelect, sectionRef }) {
   };
   return <section ref={sectionRef} className="afterglow-section universe-hub door-handoff-pending" aria-label="Entrance to the six Katseye universes">
     <div className="universe-hub-stage">
-      <Canvas className="universe-hub-canvas" camera={{ position: [0, 0, 12.5], fov: 45 }} dpr={[1, 1.75]} shadows gl={{ antialias: true }}>
+      <Canvas frameloop={canvasActive ? 'always' : 'never'} className={`universe-hub-canvas ${hovered ? 'is-symbol-hovered' : ''}`} camera={{ position: [0, 0, 12.5], fov: 45 }} dpr={[1, 1.75]} shadows gl={{ antialias: true }}>
         <PortalHall hovered={hovered} setHovered={(id) => { preloadRoomAssets(); setHovered(id); }} onSelect={enterPortal} />
       </Canvas>
       <div className="universe-hub-ribbons" aria-hidden="true"><i /><i /><i /></div>
@@ -436,8 +454,8 @@ function Lightstick({ progressRef, frozen = false }) {
   </group>;
 }
 
-function LightstickCanvas({ progressRef, frozen = false, className = '' }) {
-  return <Canvas className={className} camera={{ position: [0, 0, 10], fov: 50 }} dpr={[1, 1.75]} shadows gl={{ antialias: true, alpha: true }}>
+function LightstickCanvas({ progressRef, frozen = false, className = '', active }) {
+  return <Canvas frameloop={active ? 'always' : 'never'} className={className} camera={{ position: [0, 0, 10], fov: 50 }} dpr={[1, 1.75]} shadows gl={{ antialias: true, alpha: true }}>
     <color attach="background" args={['#b6e5ee']} /><fog attach="fog" args={['#b6e5ee', 5, 18]} />
     <ambientLight intensity={0.88} /><directionalLight position={[3, 5, 4]} intensity={2.6} color="#f4fcff" castShadow /><pointLight position={[-3, 1, 3]} intensity={1.3} color="#94dce9" />
     <Atmosphere /><FluidField /><Platform progressRef={progressRef} frozen={frozen} /><Ground progressRef={progressRef} frozen={frozen} /><Lightstick progressRef={progressRef} frozen={frozen} />
@@ -451,6 +469,7 @@ export default function LightstickExperience({ onMemberSelect }) {
   const galleryTrackRef = useRef();
   const doorsRef = useRef();
   const progressRef = useRef(0);
+  const lightstickCanvasActive = useCanvasActivity(sequenceRef);
   useLayoutEffect(() => {
     const context = gsap.context(() => {
       const lightstickProgress = { value: 0 };
@@ -507,7 +526,7 @@ export default function LightstickExperience({ onMemberSelect }) {
   return <>
     <div className="lightstick-transition" aria-label="Katseye lightstick fall sequence" ref={sequenceRef}>
       <div className="fall-pin-stage" ref={pinRef}>
-        <LightstickCanvas progressRef={progressRef} className="lightstick-canvas" />
+        <LightstickCanvas progressRef={progressRef} active={lightstickCanvasActive} className="lightstick-canvas" />
         <div className="lightstick-liquid" aria-hidden="true"><i /><i /><i /></div>
         <div className="lightstick-flow-lines" aria-hidden="true"><i /><i /><i /><i /></div>
         <div className="impact-card-gallery" ref={galleryOverlayRef} aria-label="Katseye member cards">

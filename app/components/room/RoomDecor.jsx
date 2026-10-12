@@ -3,6 +3,7 @@ import { useLoader } from '@react-three/fiber';
 import * as THREE from 'three';
 import { ROOM } from './roomConfig';
 import LaraExhibitionWalls from './ExhibitionWalls';
+import laraWall04 from '../../assets/images/rooms/lara/lara_wall_04.jpg';
 
 const SMOKED_BRONZE = '#8f7158';
 const CHAMPAGNE = '#c7ae86';
@@ -252,6 +253,15 @@ function useCuratedLaraImages() {
     texture.anisotropy = 4;
   });
   return textures;
+}
+
+// This dedicated slot mirrors the surrounding gallery-image loading path while
+// keeping the left archive frame independently replaceable by the content team.
+function useLaraExtraFrameTexture() {
+  const texture = useLoader(THREE.TextureLoader, laraWall04);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.anisotropy = 4;
+  return texture;
 }
 
 function CuratedFrame({ side, position, width, height, texture, featured = false }) {
@@ -654,11 +664,15 @@ function LaraAfterHoursArchive() {
   </group>;
 }
 
-function BronzeGalleryFrame({ side, position, width, height, texture, depth = .16 }) {
+function BronzeGalleryFrame({ side, position, width, height, texture, depth = .16, containArtwork = false }) {
   const rotation = side < 0 ? [0, 0, 0] : [0, Math.PI, 0];
+  const sourceAspect = texture?.image?.width && texture?.image?.height ? texture.image.width / texture.image.height : width / height;
+  const frameAspect = width / height;
+  const artworkWidth = containArtwork && sourceAspect < frameAspect ? height * sourceAspect : width;
+  const artworkHeight = containArtwork && sourceAspect > frameAspect ? width / sourceAspect : height;
   return <group position={position} rotation={rotation}>
     <mesh><boxGeometry args={[depth, height + .34, width + .34]} /><meshPhysicalMaterial color="#2a1b18" metalness={.56} roughness={.3} clearcoat={.16} /></mesh>
-    <mesh position={[depth / 2 + .012, 0, 0]} rotation={[0, Math.PI / 2, 0]}><planeGeometry args={[width, height]} />{texture ? <meshStandardMaterial map={texture} roughness={.62} /> : <meshPhysicalMaterial color="#110f11" metalness={.46} roughness={.36} clearcoat={.2} />}</mesh>
+    <mesh position={[depth / 2 + .012, 0, 0]} rotation={[0, Math.PI / 2, 0]}><planeGeometry args={[artworkWidth, artworkHeight]} />{texture ? <meshStandardMaterial map={texture} roughness={.62} /> : <meshPhysicalMaterial color="#110f11" metalness={.46} roughness={.36} clearcoat={.2} />}</mesh>
     {[-1, 1].map((direction) => <mesh key={direction} position={[depth / 2 + .024, direction * (height / 2 + .09), 0]}><boxGeometry args={[.04, .08, width + .22]} /><meshPhysicalMaterial color="#bd8b55" metalness={.9} roughness={.19} /></mesh>)}
     {[-1, 1].map((direction) => <mesh key={`side-${direction}`} position={[depth / 2 + .024, 0, direction * (width / 2 + .09)]}><boxGeometry args={[.04, height + .22, .08]} /><meshPhysicalMaterial color="#bd8b55" metalness={.9} roughness={.19} /></mesh>)}
   </group>;
@@ -673,11 +687,11 @@ function TallGlassCabinet({ side, position, name }) {
   </group>;
 }
 
-function LeftArchiveWall({ hero, editorial }) {
+function LeftArchiveWall({ hero, editorial, extraArtwork }) {
   return <group name="lara-left-architectural-archive">
     <BronzeGalleryFrame side={-1} position={[-3.78, 2.62, 5.05]} width={3.38} height={4.48} texture={hero} depth={.2} />
     <BronzeGalleryFrame side={-1} position={[-3.84, 2.58, 1.02]} width={2.6} height={4.24} texture={editorial} depth={.18} />
-    <BronzeGalleryFrame side={-1} position={[-3.9, 2.4, -2.1]} width={2.16} height={3.5} depth={.14} />
+    <BronzeGalleryFrame side={-1} position={[-3.9, 2.4, -2.1]} width={2.16} height={3.5} texture={extraArtwork} depth={.14} containArtwork />
     <TallGlassCabinet side={-1} position={[-3.74, 2.42, -5.48]} name="lara-left-luxury-glass-cabinet" />
   </group>;
 }
@@ -727,8 +741,9 @@ function ArchiveFloorHeroes() {
 
 function LaraArchitecturalArchive() {
   const [hero, editorial] = useCuratedLaraImages();
+  const extraArtwork = useLaraExtraFrameTexture();
   return <group name="lara-architectural-archive">
-    <LeftArchiveWall hero={hero} editorial={editorial} />
+    <LeftArchiveWall hero={hero} editorial={editorial} extraArtwork={extraArtwork} />
     <RightFashionInstallation />
     <RightMusicArchiveWall />
     <RightSculpturalCabinet />

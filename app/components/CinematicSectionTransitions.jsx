@@ -38,18 +38,27 @@ export default function CinematicSectionTransitions() {
         bridge.style.setProperty('--bridge-y', `${seam.toFixed(1)}px`);
       });
     };
+    let positionFrame = 0;
+    const requestPosition = () => {
+      if (positionFrame) return;
+      positionFrame = window.requestAnimationFrame(() => {
+        positionFrame = 0;
+        positionBridges();
+      });
+    };
     positionBridgesRef.current = positionBridges;
 
     const frame = window.requestAnimationFrame(positionBridges);
-    const resizeObserver = new ResizeObserver(positionBridges);
+    const resizeObserver = new ResizeObserver(requestPosition);
     resizeObserver.observe(page);
     chapterNodes.forEach(({ node }) => resizeObserver.observe(node));
-    window.addEventListener('resize', positionBridges);
+    window.addEventListener('resize', requestPosition);
 
     return () => {
       window.cancelAnimationFrame(frame);
+      window.cancelAnimationFrame(positionFrame);
       resizeObserver.disconnect();
-      window.removeEventListener('resize', positionBridges);
+      window.removeEventListener('resize', requestPosition);
       positionBridgesRef.current = () => {};
       setBoundaries([]);
       chapterNodes.forEach(({ node }) => node.classList.remove('cinematic-chapter'));

@@ -1,6 +1,6 @@
 :root { --global-drift-x: 0px; --global-drift-y: 0px; }
 
-.global-motion { position: fixed; z-index: 15; inset: 0; overflow: hidden; pointer-events: none; mix-blend-mode: screen; }
+.global-motion { position: fixed; z-index: 15; inset: 0; overflow: hidden; pointer-events: none; mix-blend-mode: screen; contain: layout paint style; transform: translateZ(0); }
 .global-motion-breath { position: absolute; inset: -20%; opacity: .2; background: radial-gradient(ellipse at 18% 24%, rgba(226, 255, 248, .09), transparent 39%), radial-gradient(ellipse at 82% 68%, rgba(198, 240, 255, .065), transparent 42%); transform: translate3d(0, 0, 0) scale(1); animation: global-breath 42s cubic-bezier(.45, 0, .55, 1) infinite alternate; will-change: transform, opacity; }
 .global-cursor-glow { position: absolute; top: 0; left: 0; width: min(44vw, 42rem); aspect-ratio: 1; border-radius: 50%; opacity: 0; background: radial-gradient(circle, rgba(225, 255, 249, .09), rgba(166, 234, 228, .035) 32%, transparent 69%); filter: blur(17px); transition: opacity 700ms cubic-bezier(.16, .84, .22, 1); will-change: transform, opacity; }
 .global-cursor-glow.is-active { opacity: 1; }
@@ -20,6 +20,11 @@
 
 html.global-motion-paused .global-motion-breath,
 html.global-motion-paused .global-particle-field i { animation-play-state: paused; }
+
+/* A hidden page should never spend GPU time animating decorative layers. */
+html.global-motion-paused *,
+html.global-motion-paused *::before,
+html.global-motion-paused *::after { animation-play-state: paused !important; }
 
 @media (pointer: coarse), (hover: none) { .global-cursor-glow { display: none; } }
 @media (prefers-reduced-motion: reduce) { .global-motion { display: none; } .grain, .boss-noise, .journey-v3::after, .present-day::after, .lightstick-liquid, .universe-hub-stage::before { transform: none; } }

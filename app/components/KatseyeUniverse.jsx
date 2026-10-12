@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import './KatseyeUniverse.css';
 import './KatseyeUniverseMedia.css';
 import './KatseyeUniverseArchiveTransition.css';
+import './MotionPolish.css';
 import professionalAssets from 'virtual:professional-assets';
 
 const wildTracks = ['Animal', 'Pinky Up', 'Hootie Frutti', 'Bel Air', 'That Way', 'Unloveu'];

@@ -1,0 +1,39 @@
+/* Motion-only finishing layer. It purposefully changes no sizing, colours,
+   positioning, or content — only the cadence of existing interactions. */
+
+#journey .journey-v3-card,
+#journey .journey-v3-image,
+#journey .journey-v3-copy,
+#journey .journey-v3-copy > p,
+#journey .journey-v3-copy h4,
+#journey .journey-v3-copy > div,
+#journey .journey-v3-node,
+.present-reveal,
+.present-wild-image,
+.present-film-poster,
+.present-ribbon-poster,
+.present-product,
+.campaign-piece,
+.impact-card-inner,
+.door-experience-exit { transition-timing-function: var(--premium-ease); }
+
+@media (hover:hover) {
+  .present-ribbon-poster,
+  .present-product,
+  .campaign-piece,
+  .impact-card-inner { backface-visibility: hidden; }
+
+  .door-experience-exit { transition: background .32s var(--premium-ease), color .32s var(--premium-ease), transform .32s var(--premium-ease), box-shadow .32s var(--premium-ease); }
+  .door-experience-exit:hover { transform: translateY(-1px); box-shadow: 0 .55rem 1.3rem rgba(0,0,0,.18); }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  .present-reveal,
+  .present-wild-image,
+  .present-film-poster,
+  .present-ribbon-poster,
+  .present-product,
+  .campaign-piece,
+  .impact-card-inner,
+  .door-experience-exit { transition: none; }
+}

@@ -1,7 +1,6 @@
 /* Scroll experience layer: preserves the existing archive content and layout. */
 #journey .journey-v3-card {
   min-height: clamp(440px, 62svh, 650px);
-  will-change: transform, opacity;
   transition:
     opacity .78s cubic-bezier(.22,.76,.22,1),
     transform .78s cubic-bezier(.22,.76,.22,1),
@@ -9,6 +8,14 @@
     box-shadow .42s ease,
     filter .42s ease;
 }
+#journey .journey-v3-card.is-visible { will-change: transform, opacity; }
+#journey .journey-v3-card,
+#journey .journey-v3-image,
+#journey .journey-v3-copy,
+#journey .journey-v3-copy > p,
+#journey .journey-v3-copy h4,
+#journey .journey-v3-copy > div,
+#journey .journey-v3-node { transition-timing-function: var(--premium-ease); }
 
 #journey .journey-v3-flow {
   --journey-focus-x: 0;
@@ -32,11 +39,11 @@
 }
 
 #journey .journey-v3-card.is-visible.is-current .journey-v3-image > img { filter: brightness(1.06) saturate(1.04); }
-#journey .journey-v3-image,
-#journey .journey-v3-copy,
-#journey .journey-v3-copy > p,
-#journey .journey-v3-copy h4,
-#journey .journey-v3-copy > div { will-change: transform, opacity; }
+#journey .journey-v3-card.is-visible .journey-v3-image,
+#journey .journey-v3-card.is-visible .journey-v3-copy,
+#journey .journey-v3-card.is-visible .journey-v3-copy > p,
+#journey .journey-v3-card.is-visible .journey-v3-copy h4,
+#journey .journey-v3-card.is-visible .journey-v3-copy > div { will-change: transform, opacity; }
 #journey .journey-v3-card .journey-v3-image { opacity: 0; transform: translate3d(0,12px,0) rotate(var(--journey-image-tilt,2.5deg)) scale(.95); transition: opacity .74s cubic-bezier(.22,.76,.22,1), transform .8s cubic-bezier(.22,.76,.22,1); }
 #journey .journey-v3-row-left .journey-v3-image { --journey-image-tilt: -2.5deg; }
 #journey .journey-v3-card.is-visible .journey-v3-image { opacity: 1; transform: translate3d(0,0,0) rotate(0) scale(1); }

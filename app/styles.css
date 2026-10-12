@@ -109,6 +109,18 @@
 @media (max-width:720px){.era-explore-hint{top:calc(100% + 10px);font-size:8px}}
 @media (prefers-reduced-motion:reduce){.era-explore-hint,.era-explore-hint i{transition:none}.boss-marquee-track{animation:none}}
 
+/* Final interaction polish: shared easing, clearer keyboard focus, and
+   composited hover surfaces without changing any existing layout or palette. */
+:root{--premium-ease:cubic-bezier(.16,1,.3,1)}
+:where(a,button){-webkit-tap-highlight-color:transparent}
+:where(a,button):focus-visible{outline:1px solid var(--acid);outline-offset:4px}
+.wordmark,.menu-button{transition:opacity .32s var(--premium-ease),transform .32s var(--premium-ease)}
+.menu-button span{transition:transform .32s var(--premium-ease),opacity .32s var(--premium-ease)}
+.era-switcher button{transition:background .32s var(--premium-ease),color .32s var(--premium-ease),border-color .32s var(--premium-ease),transform .32s var(--premium-ease),box-shadow .32s var(--premium-ease)}
+.release-art{backface-visibility:hidden;transform:translateZ(0)}
+@media (hover:hover){.wordmark:hover,.menu-button:hover{opacity:.82;transform:translateY(-1px)}.menu-button:hover span:first-child{transform:translateX(2px)}.menu-button:hover span:last-child{transform:translateX(-2px)}}
+@media (prefers-reduced-motion:reduce){.wordmark,.menu-button,.menu-button span,.era-switcher button{transition:none}}
+
 /* Sticker layer: themed decorative objects that sit in the environment, not inside the release imagery. */
 .era-stickers{position:absolute;z-index:1;inset:0;overflow:hidden;pointer-events:none}.era-stickers>*{position:absolute;display:block;animation:stickerFloat 6s ease-in-out infinite;filter:drop-shadow(4px 5px 0 rgba(0,0,0,.18))}.stickers-default .sticker-logo{left:8%;top:31%;padding:13px 18px 12px;border:3px solid #f2ffe0;background:#d8ff52;color:#082833;transform:rotate(-10deg);font:700 clamp(18px,2.5vw,38px)/.75 'DM Sans',sans-serif;letter-spacing:-.1em;text-align:center;box-shadow:5px 6px 0 #ecfbe0}.stickers-default .sticker-logo i{font:8px 'DM Mono',monospace;letter-spacing:.12em;display:block;margin-top:9px;color:#1d5360}.sticker-star{right:11%;top:24%;color:#d8ff52;font-size:clamp(44px,7vw,98px);text-shadow:0 0 18px rgba(216,255,82,.55);animation-delay:-2s}.sticker-eye{left:13%;bottom:16%;font-size:clamp(50px,7vw,88px);color:#a5fff0;text-shadow:0 0 15px #9affef;animation-delay:-3s}
 .stickers-sis .sticker-flower{font-size:clamp(42px,6vw,90px);color:#ff93bd;-webkit-text-stroke:5px #fff7ed;text-shadow:0 0 14px rgba(235,135,183,.35)}.stickers-sis .flower-one{left:5%;top:33%;transform:rotate(-18deg)}.stickers-sis .flower-two{right:7%;bottom:23%;color:#bca2ff;animation-delay:-2.5s}.sticker-heart{right:12%;top:31%;font-size:clamp(36px,5vw,70px);color:#ffb7cc;-webkit-text-stroke:3px #fff7ed;transform:rotate(13deg);animation-delay:-1s}.sticker-bubble{width:clamp(33px,5vw,72px);aspect-ratio:1;border-radius:50%;border:3px solid rgba(255,255,255,.85);background:radial-gradient(circle at 31% 27%,white 0 5%,transparent 9%),radial-gradient(circle at 60% 65%,rgba(164,227,255,.35),rgba(255,196,224,.23) 65%,transparent 67%);box-shadow:inset -7px -9px 14px rgba(161,204,255,.3),0 0 16px rgba(245,179,215,.5)}.bubble-one{left:23%;bottom:24%;animation-delay:-4s}.bubble-two{right:25%;top:24%;transform:scale(.58);animation-delay:-2s}.sticker-sparkle{left:15%;top:19%;font-size:50px;color:#fff5a8;text-shadow:0 0 11px #ffcfec;animation-delay:-3s}

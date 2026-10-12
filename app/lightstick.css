@@ -494,6 +494,7 @@
 .universe-hub-stage::before { opacity:.58; background:linear-gradient(112deg, transparent 0 31%, rgba(236, 231, 255, .06) 31.05% 31.12%, transparent 31.2% 100%), linear-gradient(70deg, transparent 0 67%, rgba(236, 231, 255, .04) 67.05% 67.1%, transparent 67.16% 100%); }
 .universe-hub-stage::after { background:radial-gradient(ellipse at center, transparent 22%, rgba(5,5,9,.48) 112%); }
 .universe-hub-canvas { position:absolute !important; inset:0; z-index:1; width:100% !important; height:100% !important; }
+.universe-hub-canvas.is-symbol-hovered { cursor:pointer; }
 .universe-hub-ribbons { position:absolute; z-index:0; inset:-22%; overflow:hidden; pointer-events:none; opacity:.72; }
 .universe-hub-ribbons i { position:absolute; display:block; width:140vw; height:34vh; border:1px solid rgba(224, 220, 244, .15); border-radius:50%; filter:blur(.1px); transform:rotate(var(--ribbon-angle)) scaleY(.35); animation:universe-ribbon-drift var(--ribbon-speed) ease-in-out infinite alternate; }
 .universe-hub-ribbons i:nth-child(1) { --ribbon-angle:-13deg; --ribbon-speed:23s; top:16%; left:-28vw; }
